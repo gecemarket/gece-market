@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Gece Market - Yurt Sipariş</title>
+  <style>
+    :root {
+      --primary: #5c3ebc;
+      --primary-dark: #432b89;
+      --secondary: #ffd300;
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --text: #191919;
+      --muted: #6e6e73;
+      --border: #e5e5ea;
+      --danger: #ff3b30;
+      --success: #34c759;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding-bottom: 90px;
+    }
+    /* Üst Başlık */
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .badge-open {
+      background: var(--secondary);
+      color: #000;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    /* Kategoriler */
+    .categories-bar {
+      background: var(--surface);
+      display: flex;
+      overflow-x: auto;
+      padding: 10px 14px;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 96px;
+      z-index: 90;
+      scrollbar-width: none;
+    }
+    .categories-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .cat-pill {
+      white-space: nowrap;
+      padding: 8px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .cat-pill.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    /* Ürün Listesi Grid */
+    .container {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .card-img-placeholder {
+      width: 100%;
+      height: 90px;
+      background: #f0f0f4;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 4px;
+      height: 2.4em;
+      overflow: hidden;
+    }
+    .card-volume {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .card-price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    /* Miktar & Buton Kontrolleri */
+    .btn-add {
+      background: var(--surface);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      background: var(--primary);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .qty-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-weight: 700;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .qty-number {
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+      min-width: 20px;
+      text-align: center;
+    }
+    /* Alt Yüzen Sepet Çubuğu */
+    .floating-cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+      z-index: 100;
+    }
+    .cart-summary-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .cart-summary-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .cart-summary-price {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .btn-open-cart {
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    /* Sepet Modalı / Çekmecesi */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+      justify-content: flex-end;
+      flex-direction: column;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .cart-modal {
+      background: var(--surface);
+      border-radius: 16px 16px 0 0;
+      padding: 18px 16px 24px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .cart-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .btn-close {
+      background: #f0f0f2;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    /* İlerleme Çubuğu (Teslimat Kampanyası) */
+    .promo-box {
+      background: #f4efff;
+      border: 1px dashed var(--primary);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+    .promo-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      background: #e2d9f3;
+      height: 6px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: var(--primary);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    /* Sepet İçi Liste */
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 14px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cart-item-info {
+      flex: 1;
+    }
+    .cart-item-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .cart-item-unit-price {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-trash {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 1rem;
+      padding: 4px;
+      cursor: pointer;
+    }
+    /* Hesap Özeti Tablosu */
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .summary-line.total {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    .info-input-group {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .info-input-group input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .btn-checkout {
+      background: var(--success);
+      color: white;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 14px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-checkout:disabled {
+      background: #b0b0b8;
+      cursor: not-allowed;
+    }
+    .warning-min {
+      color: var(--danger);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Üst Bar -->
+  <header>
+    <div class="top-bar">
+      <div class="logo-area">
+        <span class="logo-text">🌙 Gece Market</span>
+        <span class="badge-open">Gece Açık</span>
+      </div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Ürün ara (örn: kola, çikolata)..." oninput="filterProducts()" />
+    </div>
+  </header>
+
+  <!-- Kategori Barı -->
+  <nav class="categories-bar" id="categoryContainer">
+    <button class="cat-pill active" onclick="setCategory('Tümü', this)">Tümü</button>
+    <button class="cat-pill" onclick="setCategory('İçecekler', this)">İçecekler</button>
+    <button class="cat-pill" onclick="setCategory('Atıştırmalık', this)">Atıştırmalık</button>
+    <button class="cat-pill" onclick="setCategory('Kahvaltılık', this)">Kahvaltılık</button>
+    <button class="cat-pill" onclick="setCategory('Kişisel', this)">Kişisel</button>
+  </nav>
+
+  <!-- Ürün Grid -->
+  <main class="container" id="productGrid"></main>
+
+  <!-- Alt Sepet Çubuğu -->
+  <aside class="floating-cart-bar" id="cartBar" style="display: none;">
+    <div class="cart-summary-text">
+      <span class="cart-summary-title">Sepet Toplamı</span>
+      <span class="cart-summary-price" id="floatingTotalPrice">0 TL</span>
+    </div>
+    <button class="btn-open-cart" onclick="toggleCart(true)">
+      <span>Sepetim</span>
+      <span id="floatingTotalCount">(0)</span>
+    </button>
+  </aside>
+
+  <!-- Sepet Penceresi -->
+  <div class="modal-overlay" id="cartOverlay">
+    <div class="cart-modal">
+      <div class="cart-header">
+        <h2 class="cart-title">Sepet Detayı</h2>
+        <button class="btn-close" onclick="toggleCart(false)">&times;</button>
+      </div>
+
+      <!-- Kampanya Çubuğu -->
+      <div class="promo-box">
+        <div class="promo-text" id="promoText">300 TL üzeri teslimat ücretsiz!</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="promoProgressBar"></div>
+        </div>
+      </div>
+
+      <!-- Sepet Listesi -->
+      <div class="cart-items" id="cartItemsContainer"></div>
+
+      <!-- Fiyat Özeti -->
+      <div>
+        <div class="summary-line">
+          <span>Ürünler Toplamı:</span>
+          <span id="summarySubtotal">0 TL</span>
+        </div>
+        <div class="summary-line">
+          <span>Teslimat Ücreti:</span>
+          <span id="summaryShipping">50 TL</span>
+        </div>
+        <div class="summary-line total">
+          <span>Genel Toplam:</span>
+          <span id="summaryGrandTotal">0 TL</span>
+        </div>
+      </div>
+
+      <!-- Siparişçi Bilgileri -->
+      <div class="info-input-group">
+        <input type="text" id="custName" placeholder="Ad Soyad" />
+        <input type="text" id="custRoom" placeholder="Yurt Adı / Blok - Oda No" />
+      </div>
+
+      <button class="btn-checkout" id="btnCheckout" onclick="sendOrderWhatsApp()">
+        WhatsApp İle Sipariş Ver
+      </button>
+      <div class="warning-min" id="minOrderWarning"></div>
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------------------------
+    // Ayarlar (Kendi numaranı buraya yaz: 905xxxxxxxxx)
+    // ---------------------------------------------
+    const WHATSAPP_NUMBER = "905XXXXXXXXX"; 
+    const MIN_ORDER_AMOUNT = 100;
+    const FREE_SHIPPING_LIMIT = 300;
+    const SHIPPING_FEE = 50;
+
+    // ---------------------------------------------
+    // Ürün Veritabanı
+    // ---------------------------------------------
+    const products = [
+      // İçecekler
+      { id: 1, name: "Coca-Cola", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
+      { id: 2, name: "Coca-Cola Zero", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
+      { id: 3, name: "Fanta", volume: "1 L", price: 45, category: "İçecekler", icon: "🍊" },
+      { id: 4, name: "Sprite", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
+      { id: 5, name: "Cola Turka", volume: "1.5 L", price: 40, category: "İçecekler", icon: "🥤" },
+      { id: 6, name: "Uludağ Efsane Gazoz", volume: "1 L", price: 35, category: "İçecekler", icon: "🍾" },
+      { id: 7, name: "Uludağ Light Gazoz", volume: "1 L", price: 35, category: "İçecekler", icon: "🍾" },
+      { id: 8, name: "Niğde Gazozu", volume: "250 ml", price: 20, category: "İçecekler", icon: "🍾" },
+      { id: 9, name: "Pepsi", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
+      { id: 10, name: "Pepsi Zero", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
+      { id: 11, name: "7UP", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
+      { id: 12, name: "Schweppes Mandalina", volume: "1 L", price: 55, category: "İçecekler", icon: "🍊" },
+      { id: 13, name: "Yedigün Portakal", volume: "1 L", price: 45, category: "İçecekler", icon: "🍊" },
+      { id: 14, name: "Çamlıca Gazoz", volume: "1.5 L", price: 40, category: "İçecekler", icon: "🍾" },
+      // Atıştırmalık
+      { id: 15, name: "Lays Klasik Paket", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🥔" },
+      { id: 16, name: "Doritos Nacho", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🧀" },
+      { id: 17, name: "Ruffles Ketçap", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🍟" },
+      { id: 18, name: "Ülker Çikolatalı Gofret", volume: "Standart", price: 12, category: "Atıştırmalık", icon: "🍫" },
+      // Kahvaltılık
+      { id: 19, name: "Üçgen Peynir", volume: "8'li Paket", price: 45, category: "Kahvaltılık", icon: "🧀" },
+      { id: 20, name: "Tost Ekmeği", volume: "Büyük Boy", price: 35, category: "Kahvaltılık", icon: "🍞" },
+      { id: 21, name: "Çokoprens", volume: "10'lu Paket", price: 30, category: "Kahvaltılık", icon: "🍪" },
+      // Kişisel
+      { id: 22, name: "Islak Havlu Mendil", volume: "Paket", price: 25, category: "Kişisel", icon: "🧻" },
+      { id: 23, name: "Cep Mendili", volume: "10'lu", price: 15, category: "Kişisel", icon: "🤧" },
+      { id: 24, name: "Diş Fırçası & Macun Seti", volume: "Set", price: 70, category: "Kişisel", icon: "🪥" }
+    ];
+
+    let cart = {}; // { productId: adet }
+    let selectedCategory = "Tümü";
+
+    // Ürünleri Ekrana Bas
+    function renderProducts() {
+      const grid = document.getElementById("productGrid");
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      grid.innerHTML = "";
+
+      const filtered = products.filter(p => {
+        const matchesCat = selectedCategory === "Tümü" || p.category === selectedCategory;
+        const matchesSearch = p.name.toLowerCase().includes(query);
+        return matchesCat && matchesSearch;
+      });
+
+      filtered.forEach(p => {
+        const qty = cart[p.id] || 0;
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div>
+            <div class="card-img-placeholder">${p.icon}</div>
+            <div class="card-title">${p.name}</div>
+            <div class="card-volume">${p.volume}</div>
+          </div>
+          <div class="card-footer">
+            <span class="card-price">${p.price} TL</span>
+            ${
+              qty === 0
+                ? `<button class="btn-add" onclick="updateQty(${p.id}, 1)">Ekle</button>`
+                : `<div class="qty-controls">
+                     <button class="qty-btn" onclick="updateQty(${p.id}, -1)">-</button>
+                     <span class="qty-number">${qty}</span>
+                     <button class="qty-btn" onclick="updateQty(${p.id}, 1)">+</button>
+                   </div>`
+            }
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Sepet Miktarı Değiştir
+    function updateQty(id, delta) {
+      const current = cart[id] || 0;
+      const next = current + delta;
+      if (next <= 0) {
+        delete cart[id];
+      } else {
+        cart[id] = next;
+      }
+      renderProducts();
+      updateCartUI();
+    }
+
+    // Sepetten Ürünü Tamamen Sil
+    function removeFromCart(id) {
+      delete cart[id];
+      renderProducts();
+      updateCartUI();
+    }
+
+    // Arama ve Kategori Filtresi
+    function filterProducts() {
+      renderProducts();
+    }
+
+    function setCategory(cat, el) {
+      selectedCategory = cat;
+      document.querySelectorAll(".cat-pill").forEach(btn => btn.classList.remove("active"));
+      el.classList.add("active");
+      renderProducts();
+    }
+
+    // Sepet Verilerini Hesapla ve Çiz
+    function updateCartUI() {
+      let subtotal = 0;
+      let totalCount = 0;
+      const container = document.getElementById("cartItemsContainer");
+      container.innerHTML = "";
+
+      for (let id in cart) {
+        const product = products.find(p => p.id == id);
+        const qty = cart[id];
+        if (product && qty > 0) {
+          subtotal += product.price * qty;
+          totalCount += qty;
+
+          const itemRow = document.createElement("div");
+          itemRow.className = "cart-item";
+          itemRow.innerHTML = `
+            <div class="cart-item-info">
+              <div class="cart-item-name">${product.name}</div>
+              <div class="cart-item-unit-price">${product.price} TL x ${qty} = <b>${product.price * qty} TL</b></div>
+            </div>
+            <div class="cart-item-actions">
+              <div class="qty-controls">
+                <button class="qty-btn" onclick="updateQty(${product.id}, -1)">-</button>
+                <span class="qty-number">${qty}</span>
+                <button class="qty-btn" onclick="updateQty(${product.id}, 1)">+</button>
+              </div>
+              <button class="btn-trash" onclick="removeFromCart(${product.id})" title="Sil">🗑️</button>
+            </div>
+          `;
+          container.appendChild(itemRow);
+        }
+      }
+
+      // Alt Bar Güncelle
+      const cartBar = document.getElementById("cartBar");
+      if (totalCount > 0) {
+        cartBar.style.display = "flex";
+        document.getElementById("floatingTotalPrice").innerText = subtotal + " TL";
+        document.getElementById("floatingTotalCount").innerText = `(${totalCount})`;
+      } else {
+        cartBar.style.display = "none";
+        toggleCart(false);
+      }
+
+      // Kargo & Kampanya Mantığı
+      let shipping = 0;
+      const promoText = document.getElementById("promoText");
+      const promoBar = document.getElementById("promoProgressBar");
+
+      if (subtotal >= FREE_SHIPPING_LIMIT || subtotal === 0) {
+        shipping = 0;
+        promoText.innerText = "🎉 Harika! Ücretsiz teslimat kazandınız.";
+        promoBar.style.width = "100%";
+      } else {
+        shipping = SHIPPING_FEE;
+        const remaining = FREE_SHIPPING_LIMIT - subtotal;
+        promoText.innerText = `${remaining} TL daha ekle, teslimat ÜCRETSİZ olsun!`;
+        const percentage = Math.min(100, (subtotal / FREE_SHIPPING_LIMIT) * 100);
+        promoBar.style.width = `${percentage}%`;
+      }
+
+      const grandTotal = subtotal + (subtotal > 0 ? shipping : 0);
+
+      // Özeti Yazdır
+      document.getElementById("summarySubtotal").innerText = `${subtotal} TL`;
+      document.getElementById("summaryShipping").innerText = shipping === 0 ? "Ücretsiz" : `${shipping} TL`;
+      document.getElementById("summaryGrandTotal").innerText = `${grandTotal} TL`;
+
+      // Minimum Tutar Kontrolü
+      const checkoutBtn = document.getElementById("btnCheckout");
+      const warningText = document.getElementById("minOrderWarning");
+
+      if (subtotal < MIN_ORDER_AMOUNT) {
+        checkoutBtn.disabled = true;
+        warningText.innerText = `Minimum sipariş tutarı ${MIN_ORDER_AMOUNT} TL'dir. (${MIN_ORDER_AMOUNT - subtotal} TL daha ekleyin)`;
+      } else {
+        checkoutBtn.disabled = false;
+        warningText.innerText = "";
+      }
+    }
+
+    function toggleCart(show) {
+      document.getElementById("cartOverlay").classList.toggle("active", show);
+    }
+
+    // WhatsApp Sipariş Metni Oluşturucu
+    function sendOrderWhatsApp() {
+      const name = document.getElementById("custName").value.trim();
+      const room = document.getElementById("custRoom").value.trim();
+
+      if (!name || !room) {
+        alert("Lütfen Ad Soyad ve Yurt / Oda bilgilerinizi giriniz.");
+        return;
+      }
+
+      let subtotal = 0;
+      let orderLines = [];
+
+      for (let id in cart) {
+        const product = products.find(p => p.id == id);
+        const qty = cart[id];
+        if (product && qty > 0) {
+          subtotal += product.price * qty;
+          orderLines.push(`• ${product.name} (${qty} Adet) - ${product.price * qty} TL`);
+        }
+      }
+
+      const shipping = subtotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_FEE;
+      const grandTotal = subtotal + shipping;
+
+      let msg = `🌙 *YENİ GECE MARKET SİPARİŞİ*\n\n`;
+      msg += `👤 *Müşteri:* ${name}\n`;
+      msg += `📍 *Konum:* ${room}\n\n`;
+      msg += `📦 *Sipariş Edilen Ürünler:*\n`;
+      msg += orderLines.join("\n") + "\n\n";
+      msg += `🛒 *Ürün Toplamı:* ${subtotal} TL\n`;
+      msg += `🛵 *Teslimat Ücreti:* ${shipping === 0 ? "Ücretsiz" : shipping + " TL"}\n`;
+      msg += `💰 *Genel Toplam:* ${grandTotal} TL\n`;
+      msg += `💵 *Ödeme Türü:* Kapıda Nakit\n\n`;
+      msg += `Siparişimi onaylıyorum!`;
+
+      const encodedMsg = encodeURIComponent(msg);
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`, "_blank");
+    }
+
+    // Başlat
+    renderProducts();
+    updateCartUI();
+  </script>
+</body>
+</html>
