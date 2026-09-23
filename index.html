@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Gece Market - Yurt Sipariş</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #5c3ebc;
@@ -409,7 +408,6 @@
 </head>
 <body>
 
-  <!-- Üst Bar (Logoya 3 kez basınca admin açılır) -->
   <header>
     <div class="top-bar">
       <div class="logo-area" onclick="handleLogoClick()">
@@ -418,11 +416,10 @@
       </div>
     </div>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Ürün ara (örn: kola, çikolata)..." oninput="filterProducts()" />
+      <input type="text" id="searchInput" placeholder="Ürün ara (kola, gofret...)" oninput="filterProducts()" />
     </div>
   </header>
 
-  <!-- Kategori Barı -->
   <nav class="categories-bar" id="categoryContainer">
     <button class="cat-pill active" onclick="setCategory('Tümü', this)">Tümü</button>
     <button class="cat-pill" onclick="setCategory('İçecekler', this)">İçecekler</button>
@@ -431,10 +428,8 @@
     <button class="cat-pill" onclick="setCategory('Kişisel', this)">Kişisel</button>
   </nav>
 
-  <!-- Ürün Grid -->
   <main class="container" id="productGrid"></main>
 
-  <!-- Alt Sepet Çubuğu -->
   <aside class="floating-cart-bar" id="cartBar" style="display: none;">
     <div>
       <span class="cart-summary-title">Sepet Toplamı</span>
@@ -446,7 +441,6 @@
     </button>
   </aside>
 
-  <!-- Sepet Penceresi -->
   <div class="modal-overlay" id="cartOverlay">
     <div class="cart-modal">
       <div class="cart-header">
@@ -475,13 +469,12 @@
           <input type="text" id="custRoom" placeholder="Yurt Adı / Blok - Oda No" />
         </div>
 
-        <button class="btn-checkout" id="btnCheckout" onclick="sendOrderSupabase()">
+        <button class="btn-checkout" id="btnCheckout" onclick="sendOrderDirect()">
           Siparişi Onayla (Kapıda Nakit)
         </button>
         <div class="warning-min" id="minOrderWarning"></div>
       </div>
 
-      <!-- Sipariş Başarılı Kartı -->
       <div class="success-card" id="successCard">
         <div class="success-icon">🎉</div>
         <h3 style="margin-bottom: 8px;">Siparişiniz Alındı!</h3>
@@ -492,7 +485,6 @@
     </div>
   </div>
 
-  <!-- Gizli Yönetici Paneli -->
   <div id="adminModal">
     <div class="admin-header">
       <h2>🛵 Canlı Sipariş Paneli</h2>
@@ -500,18 +492,15 @@
     </div>
     <div style="margin-bottom: 12px; display: flex; justify-content: space-between;">
       <span>Gelen Siparişler</span>
-      <button style="background: var(--primary); color:#fff; border:none; padding:4px 8px; border-radius:4px;" onclick="loadOrders()">Yenile 🔄</button>
+      <button style="background: var(--primary); color:#fff; border:none; padding:4px 8px; border-radius:4px;" onclick="loadOrdersDirect()">Yenile 🔄</button>
     </div>
     <div id="adminOrdersContainer">Yükleniyor...</div>
   </div>
 
   <script>
-    // Supabase Bağlantısı
-    const SUPABASE_URL = "https://mohzhmkucaucrhraoafv.supabase.co";
+    const SUPABASE_BASE = "https://mohzhmkucaucrhraoafv.supabase.co/rest/v1";
     const SUPABASE_KEY = "sb_publishable_4Vm5rJr-aLRQnEnN1xsIBw_8uxbYyvp";
-    const ADMIN_PASSWORD = "5298030"; // Senin belirlediğin şifre
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const ADMIN_PASSWORD = "5298030";
 
     const MIN_ORDER_AMOUNT = 100;
     const FREE_SHIPPING_LIMIT = 300;
@@ -523,25 +512,21 @@
       { id: 3, name: "Fanta", volume: "1 L", price: 45, category: "İçecekler", icon: "🍊" },
       { id: 4, name: "Sprite", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
       { id: 5, name: "Cola Turka", volume: "1.5 L", price: 40, category: "İçecekler", icon: "🥤" },
-      { id: 6, name: "Uludağ Efsane Gazoz", volume: "1 L", price: 35, category: "İçecekler", icon: "🍾" },
-      { id: 7, name: "Uludağ Light Gazoz", volume: "1 L", price: 35, category: "İçecekler", icon: "🍾" },
-      { id: 8, name: "Niğde Gazozu", volume: "250 ml", price: 20, category: "İçecekler", icon: "🍾" },
-      { id: 9, name: "Pepsi", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
-      { id: 10, name: "Pepsi Zero", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
-      { id: 11, name: "7UP", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
-      { id: 12, name: "Schweppes Mandalina", volume: "1 L", price: 55, category: "İçecekler", icon: "🍊" },
-      { id: 13, name: "Yedigün Portakal", volume: "1 L", price: 45, category: "İçecekler", icon: "🍊" },
-      { id: 14, name: "Çamlıca Gazoz", volume: "1.5 L", price: 40, category: "İçecekler", icon: "🍾" },
-      { id: 15, name: "Lays Klasik Paket", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🥔" },
-      { id: 16, name: "Doritos Nacho", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🧀" },
-      { id: 17, name: "Ruffles Ketçap", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🍟" },
-      { id: 18, name: "Ülker Çikolatalı Gofret", volume: "Standart", price: 12, category: "Atıştırmalık", icon: "🍫" },
-      { id: 19, name: "Üçgen Peynir", volume: "8'li Paket", price: 45, category: "Kahvaltılık", icon: "🧀" },
-      { id: 20, name: "Tost Ekmeği", volume: "Büyük Boy", price: 35, category: "Kahvaltılık", icon: "🍞" },
-      { id: 21, name: "Çokoprens", volume: "10'lu Paket", price: 30, category: "Kahvaltılık", icon: "🍪" },
-      { id: 22, name: "Islak Havlu Mendil", volume: "Paket", price: 25, category: "Kişisel", icon: "🧻" },
-      { id: 23, name: "Cep Mendili", volume: "10'lu", price: 15, category: "Kişisel", icon: "🤧" },
-      { id: 24, name: "Diş Fırçası & Macun Seti", volume: "Set", price: 70, category: "Kişisel", icon: "🪥" }
+      { id: 6, name: "Uludağ Gazoz", volume: "1 L", price: 35, category: "İçecekler", icon: "🍾" },
+      { id: 7, name: "Niğde Gazozu", volume: "250 ml", price: 20, category: "İçecekler", icon: "🍾" },
+      { id: 8, name: "Pepsi", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
+      { id: 9, name: "7UP", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
+      { id: 10, name: "Schweppes Mandalina", volume: "1 L", price: 55, category: "İçecekler", icon: "🍊" },
+      { id: 11, name: "Lays Klasik Paket", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🥔" },
+      { id: 12, name: "Doritos Nacho", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🧀" },
+      { id: 13, name: "Ruffles Ketçap", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🍟" },
+      { id: 14, name: "Ülker Çikolatalı Gofret", volume: "Standart", price: 12, category: "Atıştırmalık", icon: "🍫" },
+      { id: 15, name: "Üçgen Peynir", volume: "8'li", price: 45, category: "Kahvaltılık", icon: "🧀" },
+      { id: 16, name: "Tost Ekmeği", volume: "Büyük Boy", price: 35, category: "Kahvaltılık", icon: "🍞" },
+      { id: 17, name: "Çokoprens", volume: "10'lu", price: 30, category: "Kahvaltılık", icon: "🍪" },
+      { id: 18, name: "Islak Mendil", volume: "Paket", price: 25, category: "Kişisel", icon: "🧻" },
+      { id: 19, name: "Cep Mendili", volume: "10'lu", price: 15, category: "Kişisel", icon: "🤧" },
+      { id: 20, name: "Diş Fırçası & Macun", volume: "Set", price: 70, category: "Kişisel", icon: "🪥" }
     ];
 
     let cart = {};
@@ -549,7 +534,7 @@
 
     function renderProducts() {
       const grid = document.getElementById("productGrid");
-      const query = document.getElementById("searchInput").value.toLowerCase();
+      const query = (document.getElementById("searchInput").value || "").toLowerCase();
       grid.innerHTML = "";
 
       const filtered = products.filter(p => {
@@ -638,4 +623,213 @@
         cartBar.style.display = "flex";
         document.getElementById("floatingTotalPrice").innerText = subtotal + " TL";
         document.getElementById("floatingTotalCount").innerText = `(${totalCount})`;
-      
+      } else {
+        cartBar.style.display = "none";
+        toggleCart(false);
+      }
+
+      let shipping = 0;
+      const promoText = document.getElementById("promoText");
+      const promoBar = document.getElementById("promoProgressBar");
+
+      if (subtotal >= FREE_SHIPPING_LIMIT || subtotal === 0) {
+        shipping = 0;
+        promoText.innerText = "🎉 Harika! Ücretsiz teslimat kazandınız.";
+        promoBar.style.width = "100%";
+      } else {
+        shipping = SHIPPING_FEE;
+        const remaining = FREE_SHIPPING_LIMIT - subtotal;
+        promoText.innerText = `${remaining} TL daha ekle, teslimat ÜCRETSİZ olsun!`;
+        const percentage = Math.min(100, (subtotal / FREE_SHIPPING_LIMIT) * 100);
+        promoBar.style.width = `${percentage}%`;
+      }
+
+      const grandTotal = subtotal + (subtotal > 0 ? shipping : 0);
+
+      document.getElementById("summarySubtotal").innerText = `${subtotal} TL`;
+      document.getElementById("summaryShipping").innerText = shipping === 0 ? "Ücretsiz" : `${shipping} TL`;
+      document.getElementById("summaryGrandTotal").innerText = `${grandTotal} TL`;
+
+      const checkoutBtn = document.getElementById("btnCheckout");
+      const warningText = document.getElementById("minOrderWarning");
+
+      if (subtotal < MIN_ORDER_AMOUNT) {
+        checkoutBtn.disabled = true;
+        warningText.innerText = `Minimum sipariş tutarı ${MIN_ORDER_AMOUNT} TL'dir.`;
+      } else {
+        checkoutBtn.disabled = false;
+        warningText.innerText = "";
+      }
+    }
+
+    function toggleCart(show) {
+      document.getElementById("cartOverlay").classList.toggle("active", show);
+    }
+
+    async function sendOrderDirect() {
+      const name = document.getElementById("custName").value.trim();
+      const room = document.getElementById("custRoom").value.trim();
+      const btn = document.getElementById("btnCheckout");
+
+      if (!name || !room) {
+        alert("Lütfen Ad Soyad ve Yurt / Oda bilgilerinizi giriniz.");
+        return;
+      }
+
+      let subtotal = 0;
+      let orderLines = [];
+
+      for (let id in cart) {
+        const product = products.find(p => p.id == id);
+        const qty = cart[id];
+        if (product && qty > 0) {
+          subtotal += product.price * qty;
+          orderLines.push(`${product.name} (${qty}x)`);
+        }
+      }
+
+      const shipping = subtotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_FEE;
+      const grandTotal = subtotal + shipping;
+
+      btn.disabled = true;
+      btn.innerText = "Sipariş Gönderiliyor...";
+
+      try {
+        const response = await fetch(`${SUPABASE_BASE}/orders`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify({
+            customer_name: name,
+            room_info: room,
+            items: orderLines.join(", "),
+            subtotal: subtotal,
+            shipping_fee: shipping,
+            total_amount: grandTotal,
+            status: "Hazırlanıyor"
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.text();
+          throw new Error(errData || "Sunucu hatası");
+        }
+
+        const data = await response.json();
+        const orderId = (data && data[0]) ? data[0].id : Math.floor(100 + Math.random() * 900);
+
+        document.getElementById("cartContentArea").style.display = "none";
+        document.getElementById("orderCodeText").innerText = `Sipariş No: #${orderId}`;
+        document.getElementById("successCard").classList.add("active");
+        
+        cart = {};
+        renderProducts();
+        updateCartUI();
+
+      } catch (err) {
+        alert("Sipariş veritabanına iletilemedi: " + err.message);
+        btn.disabled = false;
+        btn.innerText = "Siparişi Onayla (Kapıda Nakit)";
+      }
+    }
+
+    function resetOrderView() {
+      document.getElementById("successCard").classList.remove("active");
+      document.getElementById("cartContentArea").style.display = "block";
+      document.getElementById("custName").value = "";
+      document.getElementById("custRoom").value = "";
+      toggleCart(false);
+    }
+
+    let logoClicks = 0;
+    let clickTimer = null;
+
+    function handleLogoClick() {
+      logoClicks++;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => { logoClicks = 0; }, 1200);
+
+      if (logoClicks >= 3) {
+        logoClicks = 0;
+        const pass = prompt("Yönetici Şifresi:");
+        if (pass === ADMIN_PASSWORD) {
+          openAdmin();
+        } else if (pass !== null) {
+          alert("Hatalı şifre!");
+        }
+      }
+    }
+
+    function openAdmin() {
+      document.getElementById("adminModal").classList.add("active");
+      loadOrdersDirect();
+    }
+
+    function closeAdmin() {
+      document.getElementById("adminModal").classList.remove("active");
+    }
+
+    async function loadOrdersDirect() {
+      const container = document.getElementById("adminOrdersContainer");
+      container.innerHTML = "Siparişler yükleniyor...";
+
+      try {
+        const res = await fetch(`${SUPABASE_BASE}/orders?select=*&order=id.desc&limit=25`, {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        
+        const data = await res.json();
+        if (!data || data.length === 0) {
+          container.innerHTML = "Henüz sipariş yok.";
+          return;
+        }
+
+        container.innerHTML = data.map(o => `
+          <div class="order-card ${o.status === 'Hazırlanıyor' ? 'hazirlaniyor' : o.status === 'Yola Çıktı' ? 'yolda' : 'teslim'}">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <b>#${o.id} - ${o.customer_name}</b>
+              <span style="font-size:0.8rem; background:#333; padding:2px 6px; border-radius:4px;">${o.status}</span>
+            </div>
+            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">📍 ${o.room_info}</div>
+            <div style="font-size:0.9rem; margin:8px 0;">📦 ${o.items}</div>
+            <div style="font-weight:700; color:var(--secondary); margin-bottom:8px;">Toplam: ${o.total_amount} TL</div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Yola Çıktı')" style="flex:1; padding:6px; font-size:0.75rem; background:#432b89; color:#fff; border:none; border-radius:4px;">Yola Çıktı</button>
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Teslim Edildi')" style="flex:1; padding:6px; font-size:0.75rem; background:#34c759; color:#fff; border:none; border-radius:4px;">Teslim Edildi</button>
+            </div>
+          </div>
+        `).join("");
+      } catch (err) {
+        container.innerHTML = "Yükleme hatası: " + err.message;
+      }
+    }
+
+    async function updateOrderStatusDirect(orderId, newStatus) {
+      await fetch(`${SUPABASE_BASE}/orders?id=eq.${orderId}`, {
+        method: "PATCH",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      loadOrdersDirect();
+    }
+
+    // Sayfa açıldığında ürünleri doğrudan yükle
+    document.addEventListener("DOMContentLoaded", () => {
+      renderProducts();
+      updateCartUI();
+    });
+    renderProducts();
+  </script>
+</body>
+</html>
