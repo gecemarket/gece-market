@@ -81,7 +81,6 @@
       border: 1px solid #ff6b6b;
     }
 
-    /* İnce Fontlu Dükkan Çalışma Saatleri Duyuru Bandı */
     #storeScheduleBanner {
       display: none;
       background: #231d38;
@@ -439,35 +438,89 @@
       text-align: center;
       margin-top: 6px;
     }
+
+    /* YENİ GELİŞMİŞ SİPARİŞ ONAY KARTI */
     #confirmOverlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       z-index: 250;
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
+      backdrop-filter: blur(3px);
     }
     #confirmOverlay.active { display: flex; }
     .confirm-card {
       background: var(--surface);
       border-radius: 16px;
-      padding: 20px;
+      padding: 18px 16px;
       width: 100%;
-      max-width: 320px;
-      text-align: center;
+      max-width: 360px;
+      text-align: left;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
-    .confirm-btn-group { display: flex; gap: 8px; margin-top: 16px; }
-    .btn-confirm-yes {
+    .confirm-head {
+      text-align: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    .confirm-items-scroll {
       flex: 1;
+      overflow-y: auto;
+      max-height: 200px;
+      margin-bottom: 10px;
+      padding-right: 4px;
+    }
+    .confirm-item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .confirm-item-img {
+      width: 38px;
+      height: 38px;
+      background: #fafafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      padding: 2px;
+    }
+    .confirm-item-img img { width: 100%; height: 100%; object-fit: contain; }
+    .confirm-item-img svg { width: 20px; height: 20px; fill: #aaa; }
+    .confirm-item-details { flex: 1; }
+    .confirm-item-title { font-size: 0.85rem; font-weight: 600; color: #111; }
+    .confirm-item-sub { font-size: 0.75rem; color: #666; }
+    .confirm-summary-box {
+      background: #f9f9fb;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+    }
+    .confirm-btn-group { display: flex; gap: 8px; }
+    .btn-confirm-yes {
+      flex: 1.2;
       background: var(--success);
       color: white;
       border: none;
       padding: 12px;
       border-radius: 8px;
       font-weight: 700;
+      font-size: 0.9rem;
       cursor: pointer;
+      text-align: center;
     }
     .btn-confirm-no {
       flex: 1;
@@ -477,7 +530,9 @@
       padding: 12px;
       border-radius: 8px;
       font-weight: 700;
+      font-size: 0.85rem;
       cursor: pointer;
+      text-align: center;
     }
 
     .status-badge {
@@ -713,7 +768,6 @@
     </div>
   </header>
 
-  <!-- İNCE ZARİF ÇALIŞMA SAATLERİ DUYURUSU (12:00 - 06:00) -->
   <div id="storeScheduleBanner">
     <div class="schedule-title">🌙 Gece Market Dinleniyor</div>
     <div class="schedule-hours">Çalışma Saatlerimiz: 12:00 – 06:00 (18 Saat Kesintisiz)</div>
@@ -771,7 +825,7 @@
 
         <div class="info-input-group">
           <input type="text" id="custName" placeholder="Ad Soyad" />
-          <input type="text" id="custAddress" placeholder="Adres" />
+          <input type="text" id="custAddress" placeholder="Adres (Örn: A Blok Oda 302)" />
           <input 
             type="tel" 
             id="custPhone" 
@@ -800,14 +854,41 @@
     </div>
   </div>
 
+  <!-- GELİŞMİŞ SİPARİŞ ONAY KARTI (Fotoğraflı & Ayrıntılı) -->
   <div id="confirmOverlay">
     <div class="confirm-card">
-      <div style="font-size: 2.2rem; margin-bottom: 8px;">❓</div>
-      <h3>Siparişi onaylıyor musunuz?</h3>
-      <p style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Siparişiniz kuryeye iletilecektir.</p>
+      <div class="confirm-head">
+        <div style="font-size: 1.8rem; margin-bottom: 2px;">🛍️</div>
+        <h3 style="font-size: 1.05rem; color: #191919;">Siparişi Onaylıyor musunuz?</h3>
+        <p style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">Lütfen sepetinizi ve bilgilerinizi kontrol ediniz.</p>
+      </div>
+
+      <!-- Mini Ürün Listesi -->
+      <div class="confirm-items-scroll" id="confirmItemsContainer"></div>
+
+      <!-- Bilgi & Toplam Özeti -->
+      <div class="confirm-summary-box">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+          <span style="color:#777;">Teslimat Adresi:</span>
+          <b style="color:#222; text-align:right; max-width: 180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" id="confirmAddrText">-</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+          <span style="color:#777;">Telefon:</span>
+          <b style="color:#222;" id="confirmPhoneText">-</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+          <span style="color:#777;">Teslimat:</span>
+          <span id="confirmShippingText">50 TL</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size: 0.95rem; font-weight:800; border-top: 1px dashed #ddd; padding-top: 5px; margin-top: 4px; color: var(--primary);">
+          <span>Ödenecek Tutar:</span>
+          <span id="confirmGrandTotalText">0 TL</span>
+        </div>
+      </div>
+
       <div class="confirm-btn-group">
-        <button class="btn-confirm-no" onclick="closeConfirmModal()">Siparişe Devam Et</button>
-        <button class="btn-confirm-yes" onclick="executeOrderSupabase()">Onaylıyorum</button>
+        <button class="btn-confirm-no" onclick="closeConfirmModal()">Devam Et / Değiştir</button>
+        <button class="btn-confirm-yes" onclick="executeOrderSupabase()">Onaylıyorum (Kapıda Nakit)</button>
       </div>
     </div>
   </div>
@@ -918,7 +999,6 @@
     const FREE_SHIPPING_LIMIT = 300;
     const SHIPPING_FEE = 50;
 
-    // GÜNCELLENEN ÇALIŞMA SAATLERİ (12:00 - 06:00 -> 18 SAAT AÇIK)
     const OPEN_HOUR = 12;
     const CLOSE_HOUR = 6;
 
@@ -963,11 +1043,9 @@
       return mins <= 0 ? 1 : mins;
     }
 
-    // 12:00 - 06:00 (18 Saat Açık Kontrolü)
     function isWithinWorkingHours() {
       const trDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" }));
       const hour = trDate.getHours();
-      // Öğlen 12:00'den gece 23:59'a kadar veya gece yarısından sabah 06:00'ya kadar açık
       return (hour >= OPEN_HOUR || hour < CLOSE_HOUR);
     }
 
@@ -1294,6 +1372,7 @@
       }
     }
 
+    // GELİŞMİŞ SİPARİŞ ONAY PENCERESİNİ DOLDURMA VE AÇMA
     function askOrderConfirmation() {
       if (!isStoreOpen) {
         alert("Market şu an kapalıdır! Çalışma saatlerimiz: 12:00 – 06:00");
@@ -1309,6 +1388,42 @@
         alert("Lütfen telefon numaranızı 05********* şeklinde 11 haneli giriniz.");
         return;
       }
+
+      // Onay penceresi içindeki mini ürün listesini oluştur
+      const container = document.getElementById("confirmItemsContainer");
+      container.innerHTML = "";
+
+      let subtotal = 0;
+      for (let id in cart) {
+        const p = products.find(x => x.id == id);
+        const qty = cart[id];
+        if (p && qty > 0) {
+          const itemTotal = p.price * qty;
+          subtotal += itemTotal;
+          const imgContent = p.image_url ? `<img src="${p.image_url}" alt="${p.name}" />` : DEFAULT_BOX_SVG;
+
+          const row = document.createElement("div");
+          row.className = "confirm-item-row";
+          row.innerHTML = `
+            <div class="confirm-item-img">${imgContent}</div>
+            <div class="confirm-item-details">
+              <div class="confirm-item-title">${p.name}</div>
+              <div class="confirm-item-sub">${qty} adet x ${p.price} TL</div>
+            </div>
+            <div style="font-weight:700; font-size:0.85rem; color:#222;">${itemTotal} TL</div>
+          `;
+          container.appendChild(row);
+        }
+      }
+
+      const shipping = subtotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_FEE;
+      const grandTotal = subtotal + shipping;
+
+      document.getElementById("confirmAddrText").innerText = addr;
+      document.getElementById("confirmPhoneText").innerText = phone;
+      document.getElementById("confirmShippingText").innerText = shipping === 0 ? "Ücretsiz" : `${shipping} TL`;
+      document.getElementById("confirmGrandTotalText").innerText = `${grandTotal} TL`;
+
       document.getElementById("confirmOverlay").classList.add("active");
     }
 
