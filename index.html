@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Gece Market - Yurt Sipariş</title>
+  <title>Gece Market - Sipariş</title>
 
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#5c3ebc" />
@@ -339,12 +339,18 @@
       flex-direction: column;
       gap: 8px;
     }
-    .info-input-group input {
+    .info-input-group input, .info-input-group textarea {
       padding: 11px;
       border-radius: 8px;
       border: 1px solid var(--border);
       font-size: 0.9rem;
       outline: none;
+      width: 100%;
+    }
+    .info-input-group textarea {
+      resize: vertical;
+      min-height: 55px;
+      font-family: inherit;
     }
     .btn-checkout {
       background: var(--success);
@@ -408,11 +414,10 @@
     }
     .status-badge {
       display: inline-block;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.75rem;
       font-weight: 700;
-      margin-top: 8px;
     }
     .status-hazirlaniyor { background: #fff3cd; color: #856404; }
     .status-yolda { background: #d1ecf1; color: #0c5460; }
@@ -479,7 +484,7 @@
     }
     .order-card.archived {
       border-left-color: #34c759;
-      opacity: 0.85;
+      opacity: 0.9;
     }
     .admin-prod-card {
       background: #1e1e1e;
@@ -573,7 +578,6 @@
     <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted);">Ürünler yükleniyor...</div>
   </main>
 
-  <!-- Alt Bar (Market, Sepetim, Siparişlerim) -->
   <nav class="bottom-nav">
     <div class="nav-item active" onclick="switchTab('market')">
       <div class="nav-icon">🏪</div>
@@ -614,9 +618,10 @@
           <div class="summary-line total"><span>Genel Toplam:</span><span id="summaryGrandTotal">0 TL</span></div>
         </div>
 
+        <!-- Yalnızca Ad Soyad, Sade Adres ve İsteğe Bağlı Sipariş Notu -->
         <div class="info-input-group">
           <input type="text" id="custName" placeholder="Ad Soyad" />
-          <input type="text" id="custAddress" placeholder="Adres (Yurt Adı / Blok - Oda No)" />
+          <input type="text" id="custAddress" placeholder="Adres" />
           <input 
             type="tel" 
             id="custPhone" 
@@ -626,6 +631,7 @@
             pattern="[0-9]*"
             oninput="this.value = this.value.replace(/[^0-9]/g, '')"
           />
+          <textarea id="custNote" placeholder="Sipariş Notu (İsteğe bağlı, eklemek istediğiniz bir şey var mı?)"></textarea>
         </div>
 
         <button class="btn-checkout" id="btnCheckout" onclick="askOrderConfirmation()">
@@ -657,14 +663,14 @@
     </div>
   </div>
 
-  <!-- Müşteri Siparişlerim (Geçmiş ve Canlı) -->
+  <!-- Müşteri Siparişlerim (Aktif/Geçmiş, Destek, Tekrar Sipariş) -->
   <div class="modal-overlay" id="ordersOverlay">
     <div class="sheet-modal">
       <div class="sheet-header">
         <h2 class="sheet-title">📦 Siparişlerim</h2>
         <button class="btn-close" onclick="toggleOrders(false)">&times;</button>
       </div>
-      <div id="customerOrderStatusArea" style="text-align:center; padding:16px 8px;">
+      <div id="customerOrderStatusArea" style="text-align:center; padding:16px 4px;">
         Yükleniyor...
       </div>
     </div>
@@ -754,17 +760,21 @@
 
     const DEFAULT_BOX_SVG = `<svg viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 8.9v6.52l6 3.38v-6.52L5 8.9zm14 6.52V8.9l-6 3.38v6.52l6-3.38z"/></svg>`;
 
+    function formatDate(isoStr) {
+      if (!isoStr) return "-";
+      const d = new Date(isoStr);
+      return d.toLocaleDateString("tr-TR", { day: '2-digit', month: '2-digit', year: 'numeric' }) + " " +
+             d.toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
+    }
+
     async function fetchCategories() {
       try {
         const res = await fetch(`${SUPABASE_BASE}/categories?order=id.asc`, {
           headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
         });
         const data = await res.json();
-        if (data && data.length > 0) {
-          categories = data.map(c => c.name);
-        } else {
-          categories = ["İçecekler", "Atıştırmalık", "Kahvaltılık", "Kişisel"];
-        }
+        if (data && data.length > 0) categories = data.map(c => c.name);
+        else categories = ["İçecekler", "Atıştırmalık", "Kahvaltılık", "Kişisel"];
       } catch (e) {
         categories = ["İçecekler", "Atıştırmalık", "Kahvaltılık", "Kişisel"];
       }
@@ -1043,7 +1053,7 @@
       const phone = document.getElementById("custPhone").value.trim();
 
       if (!name) { alert("Lütfen Ad Soyad giriniz."); return; }
-      if (!addr) { alert("Lütfen açık Adres / Oda bilgisi giriniz."); return; }
+      if (!addr) { alert("Lütfen açık Adres giriniz."); return; }
       if (phone.length !== 11 || !phone.startsWith("05")) {
         alert("Lütfen telefon numaranızı 05********* şeklinde 11 haneli giriniz.");
         return;
@@ -1060,6 +1070,7 @@
       const name = document.getElementById("custName").value.trim();
       const addr = document.getElementById("custAddress").value.trim();
       const phone = document.getElementById("custPhone").value.trim();
+      const note = document.getElementById("custNote").value.trim();
       const btn = document.getElementById("btnCheckout");
 
       let subtotal = 0;
@@ -1096,6 +1107,7 @@
             subtotal: subtotal,
             shipping_fee: shipping,
             total_amount: grandTotal,
+            order_note: note || null,
             status: "Hazırlanıyor"
           })
         });
@@ -1105,11 +1117,12 @@
         const data = await response.json();
         const orderId = (data && data[0]) ? data[0].id : Math.floor(100 + Math.random() * 900);
 
-        // Müşterinin cihazına sipariş ID'sini listeye ekle (Bütün geçmişi görsün)
+        // Müşterinin cihazına sipariş ID'sini listeye ekle
         let savedOrders = JSON.parse(localStorage.getItem("myOrdersList") || "[]");
         savedOrders.unshift(orderId);
         localStorage.setItem("myOrdersList", JSON.stringify(savedOrders));
 
+        // ntfy Bildirimi (Not varsa not da bildirimde çıksın)
         try {
           fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
             method: "POST",
@@ -1118,7 +1131,7 @@
               "Priority": "urgent",
               "Tags": "bell,package"
             },
-            body: `${name} | ${addr} | Tel: ${phone}\nÜrünler: ${orderLines.join(", ")}`
+            body: `${name} | ${addr} | Tel: ${phone}\nÜrünler: ${orderLines.join(", ")}${note ? '\nNot: ' + note : ''}`
           });
         } catch (e) {}
 
@@ -1145,7 +1158,7 @@
       switchTab('orders');
     }
 
-    // Müşterinin Kendi Tüm Siparişlerini Listeleme
+    // Müşterinin Kendi Siparişleri
     async function loadCustomerOrders() {
       const area = document.getElementById("customerOrderStatusArea");
       const orderIds = JSON.parse(localStorage.getItem("myOrdersList") || "[]");
@@ -1158,10 +1171,10 @@
         return;
       }
 
-      area.innerHTML = "Siparişleriniz sorgulanıyor...";
+      area.innerHTML = "Siparişleriniz yükleniyor...";
 
       try {
-        const idQuery = orderIds.slice(0, 10).join(",");
+        const idQuery = orderIds.slice(0, 15).join(",");
         const res = await fetch(`${SUPABASE_BASE}/orders?id=in.(${idQuery})&order=id.desc`, {
           headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
         });
@@ -1178,28 +1191,112 @@
           if (o.status === "Yola Çıktı") { badgeClass = "status-yolda"; emoji = "🛵"; }
           else if (o.status === "Teslim Edildi") { badgeClass = "status-teslim"; emoji = "✅"; }
 
+          const orderDateStr = formatDate(o.created_at);
+
           return `
-            <div style="background:#f4f4f7; padding:12px; border-radius:10px; margin-bottom:12px; text-align:left;">
+            <div style="background:#f4f4f7; padding:12px; border-radius:10px; margin-bottom:14px; text-align:left;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <b style="font-size:1rem;">#${o.id}</b>
-                <span class="status-badge ${badgeClass}" style="margin-top:0;">${emoji} ${o.status}</span>
+                <span class="status-badge ${badgeClass}">${emoji} ${o.status}</span>
               </div>
-              <div style="margin:6px 0; font-size:0.85rem; color:#444;">📦 ${o.items}</div>
+              <div style="font-size:0.75rem; color:#777; margin-top:2px;">📅 Sipariş Saati: ${orderDateStr}</div>
+              <div style="margin:8px 0; font-size:0.85rem; color:#222;">📦 ${o.items}</div>
+              ${o.order_note ? `<div style="font-size:0.75rem; background:#fff; padding:6px 8px; border-radius:6px; color:#555; margin-bottom:6px;">📝 Not: ${o.order_note}</div>` : ''}
+              
               <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.9rem; margin-top:6px; border-top:1px dashed #ddd; padding-top:6px;">
                 <span>Toplam:</span>
                 <span>${o.total_amount} TL</span>
               </div>
+
+              <!-- Destek ve Tekrar Sipariş Butonları -->
+              <div style="display:flex; gap:6px; margin-top:10px;">
+                <button onclick="repeatOrder('${encodeURIComponent(o.items)}')" style="flex:1; background:var(--primary); color:#fff; border:none; padding:7px 4px; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer;">
+                  🔄 Tekrar Sipariş Ver
+                </button>
+                <button onclick="askCustomerSupport(${o.id})" style="flex:1; background:#e5e5ea; color:#333; border:none; padding:7px 4px; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer;">
+                  💬 Destek / Mesaj Yaz
+                </button>
+              </div>
             </div>
           `;
-        }).join("") + `<button onclick="loadCustomerOrders()" style="margin-top:8px; background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700;">Yenile 🔄</button>`;
+        }).join("") + `<button onclick="loadCustomerOrders()" style="margin-top:6px; background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700;">Yenile 🔄</button>`;
 
       } catch (e) {
         area.innerHTML = "Hata: " + e.message;
       }
     }
 
+    // Siparişi Tekrarla (Eski ürünleri sepete yükle)
+    function repeatOrder(encodedItems) {
+      const itemsStr = decodeURIComponent(encodedItems);
+      // Ürün formatı: Coca-Cola (2x), Lays (1x)
+      const parts = itemsStr.split(",");
+      let addedCount = 0;
+
+      parts.forEach(part => {
+        const match = part.trim().match(/^(.*?)\s*\((\d+)x\)$/);
+        if (match) {
+          const name = match[1].trim();
+          const count = parseInt(match[2]);
+          const p = products.find(x => x.name.toLowerCase() === name.toLowerCase());
+          if (p && p.in_stock !== false) {
+            cart[p.id] = (cart[p.id] || 0) + count;
+            addedCount++;
+          }
+        }
+      });
+
+      if (addedCount > 0) {
+        renderProducts();
+        updateCartUI();
+        toggleOrders(false);
+        toggleCart(true);
+        alert("Eski siparişinizdeki ürünler sepete eklendi!");
+      } else {
+        alert("Ürünler şu anda stokta bulunamadı.");
+      }
+    }
+
+    // Müşteri Destek Mesajı Gönderme
+    async function askCustomerSupport(orderId) {
+      const msg = prompt(`Sipariş #${orderId} ile ilgili mesajınızı yazınız (İptal, adres değişikliği, ek istek vb.):`);
+      if (!msg || !msg.trim()) return;
+
+      try {
+        await fetch(`${SUPABASE_BASE}/support_messages`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            order_id: orderId,
+            message: msg.trim()
+          })
+        });
+
+        // ntfy üzerinden sana bildirim gelsin
+        try {
+          fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+            method: "POST",
+            headers: {
+              "Title": `Musteri Destek Mesaji! (Siparis #${orderId})`,
+              "Priority": "urgent",
+              "Tags": "speech_balloon,warning"
+            },
+            body: `Mesaj: ${msg.trim()}`
+          });
+        } catch (e) {}
+
+        alert("Mesajınız market yetkilisine iletildi. En kısa sürede ilgilenilecektir.");
+      } catch (e) {
+        alert("Mesaj gönderilemedi: " + e.message);
+      }
+    }
+
     // ---------------------------------------------
-    // YÖNETİCİ PANELİ (Gelişmiş Sipariş ve Arşiv)
+    // YÖNETİCİ PANELİ KONTROLLERİ
     // ---------------------------------------------
     let logoClicks = 0;
     let clickTimer = null;
@@ -1258,17 +1355,23 @@
       loadAdminOrders();
     }
 
-    // Admin Siparişleri Yükleme
     async function loadAdminOrders() {
       const container = document.getElementById("adminOrdersContainer");
       const countLabel = document.getElementById("orderListCountLabel");
       container.innerHTML = "Siparişler yükleniyor...";
 
       try {
-        const res = await fetch(`${SUPABASE_BASE}/orders?select=*&order=id.desc&limit=150`, {
-          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-        });
-        const allOrders = await res.json();
+        const [ordersRes, msgsRes] = await Promise.all([
+          fetch(`${SUPABASE_BASE}/orders?select=*&order=id.desc&limit=150`, {
+            headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+          }),
+          fetch(`${SUPABASE_BASE}/support_messages?select=*&order=id.desc&limit=50`, {
+            headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+          })
+        ]);
+
+        const allOrders = await ordersRes.json();
+        const supportMsgs = await msgsRes.json();
 
         if (!allOrders || allOrders.length === 0) {
           container.innerHTML = "Henüz sipariş kaydı yok.";
@@ -1291,28 +1394,70 @@
           return;
         }
 
-        container.innerHTML = filtered.map(o => `
-          <div class="order-card ${o.status === 'Teslim Edildi' ? 'archived' : ''}">
-            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-              <b>#${o.id} - ${o.customer_name}</b>
-              <span style="font-size:0.8rem; background:#333; padding:2px 8px; border-radius:4px;">${o.status}</span>
+        container.innerHTML = filtered.map(o => {
+          const orderDateStr = formatDate(o.created_at);
+          let durationStr = "";
+          if (o.status === "Teslim Edildi") {
+            if (o.delivery_duration_minutes !== null && o.delivery_duration_minutes !== undefined) {
+              durationStr = `⏱️ Teslimat Süresi: <b>${o.delivery_duration_minutes} dakika</b>`;
+            } else if (o.delivered_at && o.created_at) {
+              const diffMin = Math.round((new Date(o.delivered_at) - new Date(o.created_at)) / 60000);
+              durationStr = `⏱️ Teslimat Süresi: <b>${diffMin > 0 ? diffMin : 1} dakika</b>`;
+            }
+          }
+
+          // Bu siparişe ait gelen destek mesajları var mı?
+          const msgsForOrder = Array.isArray(supportMsgs) ? supportMsgs.filter(m => m.order_id == o.id) : [];
+
+          return `
+            <div class="order-card ${o.status === 'Teslim Edildi' ? 'archived' : ''}">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <b>#${o.id} - ${o.customer_name}</b>
+                <span style="font-size:0.75rem; background:#333; padding:2px 8px; border-radius:4px;">${o.status}</span>
+              </div>
+              <div style="font-size:0.75rem; color:#888; margin-bottom:4px;">📅 Verilme: ${orderDateStr}</div>
+              ${durationStr ? `<div style="font-size:0.8rem; color:var(--secondary); margin-bottom:6px;">${durationStr}</div>` : ''}
+              
+              <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">📍 ${o.room_info}</div>
+              ${o.order_note ? `<div style="font-size:0.8rem; background:#2a2a2a; color:#ffd300; padding:6px; border-radius:4px; margin-bottom:6px;">📝 Not: ${o.order_note}</div>` : ''}
+
+              <!-- Gelen Destek Mesajları -->
+              ${msgsForOrder.length > 0 ? `
+                <div style="background:#3a1d1d; border-left:3px solid #ff3b30; padding:6px; border-radius:4px; margin-bottom:6px;">
+                  <b style="font-size:0.75rem; color:#ff8080;">💬 Müşteri Mesajı:</b>
+                  ${msgsForOrder.map(m => `<div style="font-size:0.8rem; color:#fff;">• ${m.message} <span style="font-size:0.7rem; color:#aaa;">(${formatDate(m.created_at)})</span></div>`).join("")}
+                </div>
+              ` : ''}
+
+              <div style="font-size:0.9rem; margin:6px 0; background:#262626; padding:8px; border-radius:6px;">📦 ${o.items}</div>
+              <div style="font-weight:700; color:var(--secondary); margin-bottom:8px;">Toplam: ${o.total_amount} TL</div>
+
+              <div style="display:flex; gap:6px;">
+                <button onclick="updateOrderStatusDirect(${o.id}, 'Hazırlanıyor', '${o.created_at}')" style="flex:1; padding:6px; font-size:0.75rem; background:#ff9500; color:#fff; border:none; border-radius:4px;">Hazırlanıyor</button>
+                <button onclick="updateOrderStatusDirect(${o.id}, 'Yola Çıktı', '${o.created_at}')" style="flex:1; padding:6px; font-size:0.75rem; background:#432b89; color:#fff; border:none; border-radius:4px;">Yola Çıktı</button>
+                <button onclick="updateOrderStatusDirect(${o.id}, 'Teslim Edildi', '${o.created_at}')" style="flex:1; padding:6px; font-size:0.75rem; background:#34c759; color:#fff; border:none; border-radius:4px;">Teslim Edildi</button>
+              </div>
             </div>
-            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">📍 ${o.room_info}</div>
-            <div style="font-size:0.9rem; margin:8px 0; background:#262626; padding:8px; border-radius:6px;">📦 ${o.items}</div>
-            <div style="font-weight:700; color:var(--secondary); margin-bottom:8px;">Toplam: ${o.total_amount} TL</div>
-            <div style="display:flex; gap:6px;">
-              <button onclick="updateOrderStatusDirect(${o.id}, 'Hazırlanıyor')" style="flex:1; padding:6px; font-size:0.75rem; background:#ff9500; color:#fff; border:none; border-radius:4px;">Hazırlanıyor</button>
-              <button onclick="updateOrderStatusDirect(${o.id}, 'Yola Çıktı')" style="flex:1; padding:6px; font-size:0.75rem; background:#432b89; color:#fff; border:none; border-radius:4px;">Yola Çıktı</button>
-              <button onclick="updateOrderStatusDirect(${o.id}, 'Teslim Edildi')" style="flex:1; padding:6px; font-size:0.75rem; background:#34c759; color:#fff; border:none; border-radius:4px;">Teslim Edildi</button>
-            </div>
-          </div>
-        `).join("");
+          `;
+        }).join("");
       } catch (err) {
         container.innerHTML = "Yükleme hatası: " + err.message;
       }
     }
 
-    async function updateOrderStatusDirect(orderId, newStatus) {
+    async function updateOrderStatusDirect(orderId, newStatus, createdAtStr) {
+      let updateBody = { status: newStatus };
+
+      // Eğer Teslim Edildi yapılıyorsa teslim süresini hesaplayıp yaz
+      if (newStatus === "Teslim Edildi") {
+        const deliveredAt = new Date();
+        updateBody.delivered_at = deliveredAt.toISOString();
+        if (createdAtStr) {
+          const diffMinutes = Math.max(1, Math.round((deliveredAt - new Date(createdAtStr)) / 60000));
+          updateBody.delivery_duration_minutes = diffMinutes;
+        }
+      }
+
       await fetch(`${SUPABASE_BASE}/orders?id=eq.${orderId}`, {
         method: "PATCH",
         headers: {
@@ -1320,7 +1465,7 @@
           "Authorization": `Bearer ${SUPABASE_KEY}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify(updateBody)
       });
       loadAdminOrders();
     }
