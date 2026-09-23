@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Gece Market - Yurt Sipariş</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #5c3ebc;
@@ -16,6 +17,7 @@
       --border: #e5e5ea;
       --danger: #ff3b30;
       --success: #34c759;
+      --warning: #ff9500;
     }
     * {
       box-sizing: border-box;
@@ -29,7 +31,6 @@
       color: var(--text);
       padding-bottom: 90px;
     }
-    /* Üst Başlık */
     header {
       background-color: var(--primary);
       color: white;
@@ -49,6 +50,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      user-select: none;
+      cursor: pointer;
     }
     .logo-text {
       font-size: 1.25rem;
@@ -73,7 +76,6 @@
       font-size: 0.95rem;
       background: #fff;
     }
-    /* Kategoriler */
     .categories-bar {
       background: var(--surface);
       display: flex;
@@ -105,7 +107,6 @@
       color: white;
       border-color: var(--primary);
     }
-    /* Ürün Listesi Grid */
     .container {
       padding: 12px;
       display: grid;
@@ -120,11 +121,10 @@
       flex-direction: column;
       justify-content: space-between;
       border: 1px solid var(--border);
-      position: relative;
     }
     .card-img-placeholder {
       width: 100%;
-      height: 90px;
+      height: 80px;
       background: #f0f0f4;
       border-radius: 8px;
       display: flex;
@@ -157,7 +157,6 @@
       font-weight: 700;
       color: var(--primary);
     }
-    /* Miktar & Buton Kontrolleri */
     .btn-add {
       background: var(--surface);
       color: var(--primary);
@@ -193,7 +192,6 @@
       min-width: 20px;
       text-align: center;
     }
-    /* Alt Yüzen Sepet Çubuğu */
     .floating-cart-bar {
       position: fixed;
       bottom: 0;
@@ -208,13 +206,10 @@
       box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
       z-index: 100;
     }
-    .cart-summary-text {
-      display: flex;
-      flex-direction: column;
-    }
     .cart-summary-title {
       font-size: 0.8rem;
       color: var(--muted);
+      display: block;
     }
     .cart-summary-price {
       font-size: 1.1rem;
@@ -229,11 +224,7 @@
       padding: 12px 20px;
       border-radius: 10px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
-    /* Sepet Modalı / Çekmecesi */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -274,7 +265,6 @@
       font-weight: 700;
       cursor: pointer;
     }
-    /* İlerleme Çubuğu (Teslimat Kampanyası) */
     .promo-box {
       background: #f4efff;
       border: 1px dashed var(--primary);
@@ -300,7 +290,6 @@
       width: 0%;
       transition: width 0.3s ease;
     }
-    /* Sepet İçi Liste */
     .cart-items {
       flex: 1;
       overflow-y: auto;
@@ -313,9 +302,6 @@
       padding: 10px 0;
       border-bottom: 1px solid var(--border);
     }
-    .cart-item-info {
-      flex: 1;
-    }
     .cart-item-name {
       font-size: 0.9rem;
       font-weight: 600;
@@ -324,20 +310,6 @@
       font-size: 0.75rem;
       color: var(--muted);
     }
-    .cart-item-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-trash {
-      background: none;
-      border: none;
-      color: var(--danger);
-      font-size: 1rem;
-      padding: 4px;
-      cursor: pointer;
-    }
-    /* Hesap Özeti Tablosu */
     .summary-line {
       display: flex;
       justify-content: space-between;
@@ -389,16 +361,60 @@
       text-align: center;
       margin-top: 6px;
     }
+    .success-card {
+      text-align: center;
+      padding: 24px 12px;
+      display: none;
+    }
+    .success-card.active {
+      display: block;
+    }
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+    #adminModal {
+      position: fixed;
+      inset: 0;
+      background: #111;
+      color: #eee;
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    #adminModal.active {
+      display: flex;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 12px;
+    }
+    .order-card {
+      background: #222;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--warning);
+    }
+    .order-card.hazirlaniyor { border-color: var(--warning); }
+    .order-card.yolda { border-color: var(--primary); }
+    .order-card.teslim { border-color: var(--success); opacity: 0.6; }
   </style>
 </head>
 <body>
 
-  <!-- Üst Bar -->
+  <!-- Üst Bar (Logoya 3 kez basınca admin açılır) -->
   <header>
     <div class="top-bar">
-      <div class="logo-area">
+      <div class="logo-area" onclick="handleLogoClick()">
         <span class="logo-text">🌙 Gece Market</span>
-        <span class="badge-open">Gece Açık</span>
+        <span class="badge-open">Açık</span>
       </div>
     </div>
     <div class="search-box">
@@ -420,7 +436,7 @@
 
   <!-- Alt Sepet Çubuğu -->
   <aside class="floating-cart-bar" id="cartBar" style="display: none;">
-    <div class="cart-summary-text">
+    <div>
       <span class="cart-summary-title">Sepet Toplamı</span>
       <span class="cart-summary-price" id="floatingTotalPrice">0 TL</span>
     </div>
@@ -438,60 +454,70 @@
         <button class="btn-close" onclick="toggleCart(false)">&times;</button>
       </div>
 
-      <!-- Kampanya Çubuğu -->
-      <div class="promo-box">
-        <div class="promo-text" id="promoText">300 TL üzeri teslimat ücretsiz!</div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="promoProgressBar"></div>
+      <div id="cartContentArea">
+        <div class="promo-box">
+          <div class="promo-text" id="promoText">300 TL üzeri teslimat ücretsiz!</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="promoProgressBar"></div>
+          </div>
         </div>
+
+        <div class="cart-items" id="cartItemsContainer"></div>
+
+        <div>
+          <div class="summary-line"><span>Ürünler:</span><span id="summarySubtotal">0 TL</span></div>
+          <div class="summary-line"><span>Teslimat Ücreti:</span><span id="summaryShipping">50 TL</span></div>
+          <div class="summary-line total"><span>Genel Toplam:</span><span id="summaryGrandTotal">0 TL</span></div>
+        </div>
+
+        <div class="info-input-group">
+          <input type="text" id="custName" placeholder="Ad Soyad" />
+          <input type="text" id="custRoom" placeholder="Yurt Adı / Blok - Oda No" />
+        </div>
+
+        <button class="btn-checkout" id="btnCheckout" onclick="sendOrderSupabase()">
+          Siparişi Onayla (Kapıda Nakit)
+        </button>
+        <div class="warning-min" id="minOrderWarning"></div>
       </div>
 
-      <!-- Sepet Listesi -->
-      <div class="cart-items" id="cartItemsContainer"></div>
-
-      <!-- Fiyat Özeti -->
-      <div>
-        <div class="summary-line">
-          <span>Ürünler Toplamı:</span>
-          <span id="summarySubtotal">0 TL</span>
-        </div>
-        <div class="summary-line">
-          <span>Teslimat Ücreti:</span>
-          <span id="summaryShipping">50 TL</span>
-        </div>
-        <div class="summary-line total">
-          <span>Genel Toplam:</span>
-          <span id="summaryGrandTotal">0 TL</span>
-        </div>
+      <!-- Sipariş Başarılı Kartı -->
+      <div class="success-card" id="successCard">
+        <div class="success-icon">🎉</div>
+        <h3 style="margin-bottom: 8px;">Siparişiniz Alındı!</h3>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">Siparişin ulaştı, hemen hazırlanıp odana getirilecek.</p>
+        <div style="background: #f0f0f4; padding: 8px; border-radius: 8px; font-weight: 700; margin-bottom: 16px;" id="orderCodeText">Sipariş No: #</div>
+        <button class="btn-checkout" onclick="resetOrderView()">Tamam</button>
       </div>
-
-      <!-- Siparişçi Bilgileri -->
-      <div class="info-input-group">
-        <input type="text" id="custName" placeholder="Ad Soyad" />
-        <input type="text" id="custRoom" placeholder="Yurt Adı / Blok - Oda No" />
-      </div>
-
-      <button class="btn-checkout" id="btnCheckout" onclick="sendOrderWhatsApp()">
-        WhatsApp İle Sipariş Ver
-      </button>
-      <div class="warning-min" id="minOrderWarning"></div>
     </div>
   </div>
 
+  <!-- Gizli Yönetici Paneli -->
+  <div id="adminModal">
+    <div class="admin-header">
+      <h2>🛵 Canlı Sipariş Paneli</h2>
+      <button style="background: #333; color:#fff; border:none; padding:6px 12px; border-radius:6px;" onclick="closeAdmin()">Kapat</button>
+    </div>
+    <div style="margin-bottom: 12px; display: flex; justify-content: space-between;">
+      <span>Gelen Siparişler</span>
+      <button style="background: var(--primary); color:#fff; border:none; padding:4px 8px; border-radius:4px;" onclick="loadOrders()">Yenile 🔄</button>
+    </div>
+    <div id="adminOrdersContainer">Yükleniyor...</div>
+  </div>
+
   <script>
-    // ---------------------------------------------
-    // Ayarlar (Kendi numaranı buraya yaz: 905xxxxxxxxx)
-    // ---------------------------------------------
-    const WHATSAPP_NUMBER = "905XXXXXXXXX"; 
+    // Supabase Bağlantısı
+    const SUPABASE_URL = "https://mohzhmkucaucrhraoafv.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_4Vm5rJr-aLRQnEnN1xsIBw_8uxbYyvp";
+    const ADMIN_PASSWORD = "5298030"; // Senin belirlediğin şifre
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const MIN_ORDER_AMOUNT = 100;
     const FREE_SHIPPING_LIMIT = 300;
     const SHIPPING_FEE = 50;
 
-    // ---------------------------------------------
-    // Ürün Veritabanı
-    // ---------------------------------------------
     const products = [
-      // İçecekler
       { id: 1, name: "Coca-Cola", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
       { id: 2, name: "Coca-Cola Zero", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
       { id: 3, name: "Fanta", volume: "1 L", price: 45, category: "İçecekler", icon: "🍊" },
@@ -506,25 +532,21 @@
       { id: 12, name: "Schweppes Mandalina", volume: "1 L", price: 55, category: "İçecekler", icon: "🍊" },
       { id: 13, name: "Yedigün Portakal", volume: "1 L", price: 45, category: "İçecekler", icon: "🍊" },
       { id: 14, name: "Çamlıca Gazoz", volume: "1.5 L", price: 40, category: "İçecekler", icon: "🍾" },
-      // Atıştırmalık
       { id: 15, name: "Lays Klasik Paket", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🥔" },
       { id: 16, name: "Doritos Nacho", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🧀" },
       { id: 17, name: "Ruffles Ketçap", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🍟" },
       { id: 18, name: "Ülker Çikolatalı Gofret", volume: "Standart", price: 12, category: "Atıştırmalık", icon: "🍫" },
-      // Kahvaltılık
       { id: 19, name: "Üçgen Peynir", volume: "8'li Paket", price: 45, category: "Kahvaltılık", icon: "🧀" },
       { id: 20, name: "Tost Ekmeği", volume: "Büyük Boy", price: 35, category: "Kahvaltılık", icon: "🍞" },
       { id: 21, name: "Çokoprens", volume: "10'lu Paket", price: 30, category: "Kahvaltılık", icon: "🍪" },
-      // Kişisel
       { id: 22, name: "Islak Havlu Mendil", volume: "Paket", price: 25, category: "Kişisel", icon: "🧻" },
       { id: 23, name: "Cep Mendili", volume: "10'lu", price: 15, category: "Kişisel", icon: "🤧" },
       { id: 24, name: "Diş Fırçası & Macun Seti", volume: "Set", price: 70, category: "Kişisel", icon: "🪥" }
     ];
 
-    let cart = {}; // { productId: adet }
+    let cart = {};
     let selectedCategory = "Tümü";
 
-    // Ürünleri Ekrana Bas
     function renderProducts() {
       const grid = document.getElementById("productGrid");
       const query = document.getElementById("searchInput").value.toLowerCase();
@@ -563,30 +585,16 @@
       });
     }
 
-    // Sepet Miktarı Değiştir
     function updateQty(id, delta) {
       const current = cart[id] || 0;
       const next = current + delta;
-      if (next <= 0) {
-        delete cart[id];
-      } else {
-        cart[id] = next;
-      }
+      if (next <= 0) delete cart[id];
+      else cart[id] = next;
       renderProducts();
       updateCartUI();
     }
 
-    // Sepetten Ürünü Tamamen Sil
-    function removeFromCart(id) {
-      delete cart[id];
-      renderProducts();
-      updateCartUI();
-    }
-
-    // Arama ve Kategori Filtresi
-    function filterProducts() {
-      renderProducts();
-    }
+    function filterProducts() { renderProducts(); }
 
     function setCategory(cat, el) {
       selectedCategory = cat;
@@ -595,7 +603,6 @@
       renderProducts();
     }
 
-    // Sepet Verilerini Hesapla ve Çiz
     function updateCartUI() {
       let subtotal = 0;
       let totalCount = 0;
@@ -616,114 +623,19 @@
               <div class="cart-item-name">${product.name}</div>
               <div class="cart-item-unit-price">${product.price} TL x ${qty} = <b>${product.price * qty} TL</b></div>
             </div>
-            <div class="cart-item-actions">
-              <div class="qty-controls">
-                <button class="qty-btn" onclick="updateQty(${product.id}, -1)">-</button>
-                <span class="qty-number">${qty}</span>
-                <button class="qty-btn" onclick="updateQty(${product.id}, 1)">+</button>
-              </div>
-              <button class="btn-trash" onclick="removeFromCart(${product.id})" title="Sil">🗑️</button>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty(${product.id}, -1)">-</button>
+              <span class="qty-number">${qty}</span>
+              <button class="qty-btn" onclick="updateQty(${product.id}, 1)">+</button>
             </div>
           `;
           container.appendChild(itemRow);
         }
       }
 
-      // Alt Bar Güncelle
       const cartBar = document.getElementById("cartBar");
       if (totalCount > 0) {
         cartBar.style.display = "flex";
         document.getElementById("floatingTotalPrice").innerText = subtotal + " TL";
         document.getElementById("floatingTotalCount").innerText = `(${totalCount})`;
-      } else {
-        cartBar.style.display = "none";
-        toggleCart(false);
-      }
-
-      // Kargo & Kampanya Mantığı
-      let shipping = 0;
-      const promoText = document.getElementById("promoText");
-      const promoBar = document.getElementById("promoProgressBar");
-
-      if (subtotal >= FREE_SHIPPING_LIMIT || subtotal === 0) {
-        shipping = 0;
-        promoText.innerText = "🎉 Harika! Ücretsiz teslimat kazandınız.";
-        promoBar.style.width = "100%";
-      } else {
-        shipping = SHIPPING_FEE;
-        const remaining = FREE_SHIPPING_LIMIT - subtotal;
-        promoText.innerText = `${remaining} TL daha ekle, teslimat ÜCRETSİZ olsun!`;
-        const percentage = Math.min(100, (subtotal / FREE_SHIPPING_LIMIT) * 100);
-        promoBar.style.width = `${percentage}%`;
-      }
-
-      const grandTotal = subtotal + (subtotal > 0 ? shipping : 0);
-
-      // Özeti Yazdır
-      document.getElementById("summarySubtotal").innerText = `${subtotal} TL`;
-      document.getElementById("summaryShipping").innerText = shipping === 0 ? "Ücretsiz" : `${shipping} TL`;
-      document.getElementById("summaryGrandTotal").innerText = `${grandTotal} TL`;
-
-      // Minimum Tutar Kontrolü
-      const checkoutBtn = document.getElementById("btnCheckout");
-      const warningText = document.getElementById("minOrderWarning");
-
-      if (subtotal < MIN_ORDER_AMOUNT) {
-        checkoutBtn.disabled = true;
-        warningText.innerText = `Minimum sipariş tutarı ${MIN_ORDER_AMOUNT} TL'dir. (${MIN_ORDER_AMOUNT - subtotal} TL daha ekleyin)`;
-      } else {
-        checkoutBtn.disabled = false;
-        warningText.innerText = "";
-      }
-    }
-
-    function toggleCart(show) {
-      document.getElementById("cartOverlay").classList.toggle("active", show);
-    }
-
-    // WhatsApp Sipariş Metni Oluşturucu
-    function sendOrderWhatsApp() {
-      const name = document.getElementById("custName").value.trim();
-      const room = document.getElementById("custRoom").value.trim();
-
-      if (!name || !room) {
-        alert("Lütfen Ad Soyad ve Yurt / Oda bilgilerinizi giriniz.");
-        return;
-      }
-
-      let subtotal = 0;
-      let orderLines = [];
-
-      for (let id in cart) {
-        const product = products.find(p => p.id == id);
-        const qty = cart[id];
-        if (product && qty > 0) {
-          subtotal += product.price * qty;
-          orderLines.push(`• ${product.name} (${qty} Adet) - ${product.price * qty} TL`);
-        }
-      }
-
-      const shipping = subtotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_FEE;
-      const grandTotal = subtotal + shipping;
-
-      let msg = `🌙 *YENİ GECE MARKET SİPARİŞİ*\n\n`;
-      msg += `👤 *Müşteri:* ${name}\n`;
-      msg += `📍 *Konum:* ${room}\n\n`;
-      msg += `📦 *Sipariş Edilen Ürünler:*\n`;
-      msg += orderLines.join("\n") + "\n\n";
-      msg += `🛒 *Ürün Toplamı:* ${subtotal} TL\n`;
-      msg += `🛵 *Teslimat Ücreti:* ${shipping === 0 ? "Ücretsiz" : shipping + " TL"}\n`;
-      msg += `💰 *Genel Toplam:* ${grandTotal} TL\n`;
-      msg += `💵 *Ödeme Türü:* Kapıda Nakit\n\n`;
-      msg += `Siparişimi onaylıyorum!`;
-
-      const encodedMsg = encodeURIComponent(msg);
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`, "_blank");
-    }
-
-    // Başlat
-    renderProducts();
-    updateCartUI();
-  </script>
-</body>
-</html>
+      
