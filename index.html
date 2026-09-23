@@ -439,7 +439,6 @@
       margin-top: 6px;
     }
 
-    /* YENİ GELİŞMİŞ SİPARİŞ ONAY KARTI */
     #confirmOverlay {
       position: fixed;
       inset: 0;
@@ -628,6 +627,26 @@
     .order-card-delete-btn:hover {
       background: #ff3b30;
       color: #fff;
+    }
+
+    /* TELEFON ARAMA BUTONU STİLİ */
+    .btn-call-customer {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #28a745;
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 6px;
+      vertical-align: middle;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .btn-call-customer:hover {
+      background: #218838;
     }
 
     .timeline-box {
@@ -863,10 +882,8 @@
         <p style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">Lütfen sepetinizi ve bilgilerinizi kontrol ediniz.</p>
       </div>
 
-      <!-- Mini Ürün Listesi -->
       <div class="confirm-items-scroll" id="confirmItemsContainer"></div>
 
-      <!-- Bilgi & Toplam Özeti -->
       <div class="confirm-summary-box">
         <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
           <span style="color:#777;">Teslimat Adresi:</span>
@@ -1372,7 +1389,6 @@
       }
     }
 
-    // GELİŞMİŞ SİPARİŞ ONAY PENCERESİNİ DOLDURMA VE AÇMA
     function askOrderConfirmation() {
       if (!isStoreOpen) {
         alert("Market şu an kapalıdır! Çalışma saatlerimiz: 12:00 – 06:00");
@@ -1389,7 +1405,6 @@
         return;
       }
 
-      // Onay penceresi içindeki mini ürün listesini oluştur
       const container = document.getElementById("confirmItemsContainer");
       container.innerHTML = "";
 
@@ -1753,6 +1768,7 @@
       }
     }
 
+    // YÖNETİCİ PANELİNDE TEK TIKLA ARAMA BUTONLU SİPARİŞ LİSTESİ
     function renderAdminOrdersUI() {
       const container = document.getElementById("adminOrdersContainer");
       const countLabel = document.getElementById("orderListCountLabel");
@@ -1819,6 +1835,10 @@
         let cardClass = "";
         if (o.status === "Teslim Edildi") cardClass = "archived";
         else if (o.status === "İptal Edildi") cardClass = "cancelled";
+
+        // Telefon numarasını ayıklayıp doğrudan arama linki oluşturma
+        const phoneMatch = o.room_info ? o.room_info.match(/05\d{9}/) : null;
+        const rawPhone = phoneMatch ? phoneMatch[0] : "";
 
         return `
           <div class="order-card ${cardClass}">
@@ -1887,7 +1907,12 @@
               ` : ''}
             </div>
             
-            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">📍 ${o.room_info}</div>
+            <!-- Adres ve Tek Tıkla Arama Butonu -->
+            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap;">
+              <span>📍 ${o.room_info}</span>
+              ${rawPhone ? `<a href="tel:${rawPhone}" class="btn-call-customer">📞 ${rawPhone} Ara</a>` : ''}
+            </div>
+
             ${o.order_note ? `<div style="font-size:0.8rem; background:#2a2a2a; color:#ffd300; padding:6px; border-radius:4px; margin-bottom:6px;">📝 Not: ${o.order_note}</div>` : ''}
 
             ${msgsForOrder.length > 0 ? `
