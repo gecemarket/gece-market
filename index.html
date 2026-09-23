@@ -618,7 +618,6 @@
           <div class="summary-line total"><span>Genel Toplam:</span><span id="summaryGrandTotal">0 TL</span></div>
         </div>
 
-        <!-- Yalnızca Ad Soyad, Sade Adres ve İsteğe Bağlı Sipariş Notu -->
         <div class="info-input-group">
           <input type="text" id="custName" placeholder="Ad Soyad" />
           <input type="text" id="custAddress" placeholder="Adres" />
@@ -663,7 +662,7 @@
     </div>
   </div>
 
-  <!-- Müşteri Siparişlerim (Aktif/Geçmiş, Destek, Tekrar Sipariş) -->
+  <!-- Müşteri Siparişlerim -->
   <div class="modal-overlay" id="ordersOverlay">
     <div class="sheet-modal">
       <div class="sheet-header">
@@ -697,7 +696,6 @@
       <button class="admin-tab-btn" id="tabBtnCategories" onclick="switchAdminTab('categories')">Kategoriler 📁</button>
     </div>
 
-    <!-- Siparişler Sekmesi -->
     <div id="adminOrdersSection">
       <div class="order-sub-tabs">
         <button class="order-sub-tab active" id="subTabActive" onclick="switchOrderFilter('active')">Aktif Siparişler ⚡</button>
@@ -710,7 +708,6 @@
       <div id="adminOrdersContainer">Yükleniyor...</div>
     </div>
 
-    <!-- Ürün Yönetimi -->
     <div id="adminProductsSection" style="display:none;">
       <div class="admin-form-box">
         <h4 style="margin-bottom:8px; color:var(--secondary);">+ Yeni Ürün Ekle</h4>
@@ -727,7 +724,6 @@
       <div id="adminProductsContainer">Yükleniyor...</div>
     </div>
 
-    <!-- Kategori Yönetimi -->
     <div id="adminCategoriesSection" style="display:none;">
       <div class="admin-form-box">
         <h4 style="margin-bottom:8px; color:var(--secondary);">+ Yeni Kategori Ekle</h4>
@@ -757,12 +753,14 @@
     let selectedCategory = "Tümü";
     let isStoreOpen = true;
     let currentOrderFilter = "active";
+    let adminOrdersData = []; // Verileri tam obje olarak saklayıp hatasız süre hesaplamak için
 
     const DEFAULT_BOX_SVG = `<svg viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 8.9v6.52l6 3.38v-6.52L5 8.9zm14 6.52V8.9l-6 3.38v6.52l6-3.38z"/></svg>`;
 
     function formatDate(isoStr) {
       if (!isoStr) return "-";
       const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return "-";
       return d.toLocaleDateString("tr-TR", { day: '2-digit', month: '2-digit', year: 'numeric' }) + " " +
              d.toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
     }
@@ -1092,6 +1090,8 @@
       btn.innerText = "Sipariş Alınıyor...";
 
       try {
+        const nowIso = new Date().toISOString(); // Kesin sipariş oluşturulma zaman damgası
+
         const response = await fetch(`${SUPABASE_BASE}/orders`, {
           method: "POST",
           headers: {
@@ -1108,7 +1108,8 @@
             shipping_fee: shipping,
             total_amount: grandTotal,
             order_note: note || null,
-            status: "Hazırlanıyor"
+            status: "Hazırlanıyor",
+            created_at: nowIso
           })
         });
 
@@ -1117,12 +1118,10 @@
         const data = await response.json();
         const orderId = (data && data[0]) ? data[0].id : Math.floor(100 + Math.random() * 900);
 
-        // Müşterinin cihazına sipariş ID'sini listeye ekle
         let savedOrders = JSON.parse(localStorage.getItem("myOrdersList") || "[]");
         savedOrders.unshift(orderId);
         localStorage.setItem("myOrdersList", JSON.stringify(savedOrders));
 
-        // ntfy Bildirimi (Not varsa not da bildirimde çıksın)
         try {
           fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
             method: "POST",
@@ -1158,7 +1157,6 @@
       switchTab('orders');
     }
 
-    // Müşterinin Kendi Siparişleri
     async function loadCustomerOrders() {
       const area = document.getElementById("customerOrderStatusArea");
       const orderIds = JSON.parse(localStorage.getItem("myOrdersList") || "[]");
@@ -1208,7 +1206,6 @@
                 <span>${o.total_amount} TL</span>
               </div>
 
-              <!-- Destek ve Tekrar Sipariş Butonları -->
               <div style="display:flex; gap:6px; margin-top:10px;">
                 <button onclick="repeatOrder('${encodeURIComponent(o.items)}')" style="flex:1; background:var(--primary); color:#fff; border:none; padding:7px 4px; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer;">
                   🔄 Tekrar Sipariş Ver
@@ -1226,10 +1223,8 @@
       }
     }
 
-    // Siparişi Tekrarla (Eski ürünleri sepete yükle)
     function repeatOrder(encodedItems) {
       const itemsStr = decodeURIComponent(encodedItems);
-      // Ürün formatı: Coca-Cola (2x), Lays (1x)
       const parts = itemsStr.split(",");
       let addedCount = 0;
 
@@ -1257,7 +1252,6 @@
       }
     }
 
-    // Müşteri Destek Mesajı Gönderme
     async function askCustomerSupport(orderId) {
       const msg = prompt(`Sipariş #${orderId} ile ilgili mesajınızı yazınız (İptal, adres değişikliği, ek istek vb.):`);
       if (!msg || !msg.trim()) return;
@@ -1276,7 +1270,6 @@
           })
         });
 
-        // ntfy üzerinden sana bildirim gelsin
         try {
           fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
             method: "POST",
@@ -1352,12 +1345,11 @@
       currentOrderFilter = filter;
       document.getElementById("subTabActive").classList.toggle("active", filter === 'active');
       document.getElementById("subTabArchived").classList.toggle("active", filter === 'archived');
-      loadAdminOrders();
+      renderAdminOrdersUI();
     }
 
     async function loadAdminOrders() {
       const container = document.getElementById("adminOrdersContainer");
-      const countLabel = document.getElementById("orderListCountLabel");
       container.innerHTML = "Siparişler yükleniyor...";
 
       try {
@@ -1370,91 +1362,110 @@
           })
         ]);
 
-        const allOrders = await ordersRes.json();
-        const supportMsgs = await msgsRes.json();
+        adminOrdersData = await ordersRes.json();
+        window.adminSupportMsgs = await msgsRes.json();
 
-        if (!allOrders || allOrders.length === 0) {
-          container.innerHTML = "Henüz sipariş kaydı yok.";
-          countLabel.innerText = "0 Sipariş";
-          return;
-        }
-
-        const filtered = allOrders.filter(o => {
-          if (currentOrderFilter === 'active') {
-            return o.status === 'Hazırlanıyor' || o.status === 'Yola Çıktı';
-          } else {
-            return o.status === 'Teslim Edildi';
-          }
-        });
-
-        countLabel.innerText = `${filtered.length} sipariş listelendi`;
-
-        if (filtered.length === 0) {
-          container.innerHTML = `<div style="text-align:center; padding:24px; color:#888;">${currentOrderFilter === 'active' ? 'Bekleyen aktif sipariş yok 🎉' : 'Teslim edilmiş sipariş bulunmuyor.'}</div>`;
-          return;
-        }
-
-        container.innerHTML = filtered.map(o => {
-          const orderDateStr = formatDate(o.created_at);
-          let durationStr = "";
-          if (o.status === "Teslim Edildi") {
-            if (o.delivery_duration_minutes !== null && o.delivery_duration_minutes !== undefined) {
-              durationStr = `⏱️ Teslimat Süresi: <b>${o.delivery_duration_minutes} dakika</b>`;
-            } else if (o.delivered_at && o.created_at) {
-              const diffMin = Math.round((new Date(o.delivered_at) - new Date(o.created_at)) / 60000);
-              durationStr = `⏱️ Teslimat Süresi: <b>${diffMin > 0 ? diffMin : 1} dakika</b>`;
-            }
-          }
-
-          // Bu siparişe ait gelen destek mesajları var mı?
-          const msgsForOrder = Array.isArray(supportMsgs) ? supportMsgs.filter(m => m.order_id == o.id) : [];
-
-          return `
-            <div class="order-card ${o.status === 'Teslim Edildi' ? 'archived' : ''}">
-              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                <b>#${o.id} - ${o.customer_name}</b>
-                <span style="font-size:0.75rem; background:#333; padding:2px 8px; border-radius:4px;">${o.status}</span>
-              </div>
-              <div style="font-size:0.75rem; color:#888; margin-bottom:4px;">📅 Verilme: ${orderDateStr}</div>
-              ${durationStr ? `<div style="font-size:0.8rem; color:var(--secondary); margin-bottom:6px;">${durationStr}</div>` : ''}
-              
-              <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">📍 ${o.room_info}</div>
-              ${o.order_note ? `<div style="font-size:0.8rem; background:#2a2a2a; color:#ffd300; padding:6px; border-radius:4px; margin-bottom:6px;">📝 Not: ${o.order_note}</div>` : ''}
-
-              <!-- Gelen Destek Mesajları -->
-              ${msgsForOrder.length > 0 ? `
-                <div style="background:#3a1d1d; border-left:3px solid #ff3b30; padding:6px; border-radius:4px; margin-bottom:6px;">
-                  <b style="font-size:0.75rem; color:#ff8080;">💬 Müşteri Mesajı:</b>
-                  ${msgsForOrder.map(m => `<div style="font-size:0.8rem; color:#fff;">• ${m.message} <span style="font-size:0.7rem; color:#aaa;">(${formatDate(m.created_at)})</span></div>`).join("")}
-                </div>
-              ` : ''}
-
-              <div style="font-size:0.9rem; margin:6px 0; background:#262626; padding:8px; border-radius:6px;">📦 ${o.items}</div>
-              <div style="font-weight:700; color:var(--secondary); margin-bottom:8px;">Toplam: ${o.total_amount} TL</div>
-
-              <div style="display:flex; gap:6px;">
-                <button onclick="updateOrderStatusDirect(${o.id}, 'Hazırlanıyor', '${o.created_at}')" style="flex:1; padding:6px; font-size:0.75rem; background:#ff9500; color:#fff; border:none; border-radius:4px;">Hazırlanıyor</button>
-                <button onclick="updateOrderStatusDirect(${o.id}, 'Yola Çıktı', '${o.created_at}')" style="flex:1; padding:6px; font-size:0.75rem; background:#432b89; color:#fff; border:none; border-radius:4px;">Yola Çıktı</button>
-                <button onclick="updateOrderStatusDirect(${o.id}, 'Teslim Edildi', '${o.created_at}')" style="flex:1; padding:6px; font-size:0.75rem; background:#34c759; color:#fff; border:none; border-radius:4px;">Teslim Edildi</button>
-              </div>
-            </div>
-          `;
-        }).join("");
+        renderAdminOrdersUI();
       } catch (err) {
         container.innerHTML = "Yükleme hatası: " + err.message;
       }
     }
 
-    async function updateOrderStatusDirect(orderId, newStatus, createdAtStr) {
+    function renderAdminOrdersUI() {
+      const container = document.getElementById("adminOrdersContainer");
+      const countLabel = document.getElementById("orderListCountLabel");
+
+      if (!adminOrdersData || adminOrdersData.length === 0) {
+        container.innerHTML = "Henüz sipariş kaydı yok.";
+        countLabel.innerText = "0 Sipariş";
+        return;
+      }
+
+      const filtered = adminOrdersData.filter(o => {
+        if (currentOrderFilter === 'active') {
+          return o.status === 'Hazırlanıyor' || o.status === 'Yola Çıktı';
+        } else {
+          return o.status === 'Teslim Edildi';
+        }
+      });
+
+      countLabel.innerText = `${filtered.length} sipariş listelendi`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:24px; color:#888;">${currentOrderFilter === 'active' ? 'Bekleyen aktif sipariş yok 🎉' : 'Teslim edilmiş sipariş bulunmuyor.'}</div>`;
+        return;
+      }
+
+      const supportMsgs = window.adminSupportMsgs || [];
+
+      container.innerHTML = filtered.map(o => {
+        const orderDateStr = formatDate(o.created_at);
+        let durationStr = "";
+
+        if (o.status === "Teslim Edildi") {
+          let mins = o.delivery_duration_minutes;
+          if ((mins === null || mins === undefined) && o.delivered_at && o.created_at) {
+            const start = new Date(o.created_at).getTime();
+            const end = new Date(o.delivered_at).getTime();
+            if (!isNaN(start) && !isNaN(end) && end >= start) {
+              mins = Math.round((end - start) / 60000);
+            }
+          }
+
+          if (mins !== null && mins !== undefined) {
+            durationStr = `⏱️ Teslimat Süresi: <b>${mins === 0 ? '1 dakikadan az' : mins + ' dakika'}</b>`;
+          }
+        }
+
+        const msgsForOrder = Array.isArray(supportMsgs) ? supportMsgs.filter(m => m.order_id == o.id) : [];
+
+        return `
+          <div class="order-card ${o.status === 'Teslim Edildi' ? 'archived' : ''}">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <b>#${o.id} - ${o.customer_name}</b>
+              <span style="font-size:0.75rem; background:#333; padding:2px 8px; border-radius:4px;">${o.status}</span>
+            </div>
+            <div style="font-size:0.75rem; color:#888; margin-bottom:4px;">📅 Verilme: ${orderDateStr}</div>
+            ${durationStr ? `<div style="font-size:0.8rem; color:var(--secondary); margin-bottom:6px;">${durationStr}</div>` : ''}
+            
+            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">📍 ${o.room_info}</div>
+            ${o.order_note ? `<div style="font-size:0.8rem; background:#2a2a2a; color:#ffd300; padding:6px; border-radius:4px; margin-bottom:6px;">📝 Not: ${o.order_note}</div>` : ''}
+
+            ${msgsForOrder.length > 0 ? `
+              <div style="background:#3a1d1d; border-left:3px solid #ff3b30; padding:6px; border-radius:4px; margin-bottom:6px;">
+                <b style="font-size:0.75rem; color:#ff8080;">💬 Müşteri Mesajı:</b>
+                ${msgsForOrder.map(m => `<div style="font-size:0.8rem; color:#fff;">• ${m.message} <span style="font-size:0.7rem; color:#aaa;">(${formatDate(m.created_at)})</span></div>`).join("")}
+              </div>
+            ` : ''}
+
+            <div style="font-size:0.9rem; margin:6px 0; background:#262626; padding:8px; border-radius:6px;">📦 ${o.items}</div>
+            <div style="font-weight:700; color:var(--secondary); margin-bottom:8px;">Toplam: ${o.total_amount} TL</div>
+
+            <div style="display:flex; gap:6px;">
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Hazırlanıyor')" style="flex:1; padding:6px; font-size:0.75rem; background:#ff9500; color:#fff; border:none; border-radius:4px; cursor:pointer;">Hazırlanıyor</button>
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Yola Çıktı')" style="flex:1; padding:6px; font-size:0.75rem; background:#432b89; color:#fff; border:none; border-radius:4px; cursor:pointer;">Yola Çıktı</button>
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Teslim Edildi')" style="flex:1; padding:6px; font-size:0.75rem; background:#34c759; color:#fff; border:none; border-radius:4px; cursor:pointer;">Teslim Edildi</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function updateOrderStatusDirect(orderId, newStatus) {
       let updateBody = { status: newStatus };
 
-      // Eğer Teslim Edildi yapılıyorsa teslim süresini hesaplayıp yaz
       if (newStatus === "Teslim Edildi") {
+        const orderObj = adminOrdersData.find(x => x.id === orderId);
         const deliveredAt = new Date();
         updateBody.delivered_at = deliveredAt.toISOString();
-        if (createdAtStr) {
-          const diffMinutes = Math.max(1, Math.round((deliveredAt - new Date(createdAtStr)) / 60000));
-          updateBody.delivery_duration_minutes = diffMinutes;
+
+        if (orderObj && orderObj.created_at) {
+          const startTime = new Date(orderObj.created_at).getTime();
+          const endTime = deliveredAt.getTime();
+          if (!isNaN(startTime) && endTime >= startTime) {
+            const diffMinutes = Math.round((endTime - startTime) / 60000);
+            updateBody.delivery_duration_minutes = diffMinutes;
+          }
         }
       }
 
@@ -1467,6 +1478,7 @@
         },
         body: JSON.stringify(updateBody)
       });
+
       loadAdminOrders();
     }
 
@@ -1601,7 +1613,6 @@
       fetchProductsFromDB();
     }
 
-    // Kategori Yönetimi
     async function loadAdminCategories() {
       const container = document.getElementById("adminCategoriesList");
       container.innerHTML = categories.map(c => `
@@ -1647,7 +1658,6 @@
       }
     }
 
-    // Başlangıç Çalıştırması
     checkStoreStatus();
     fetchCategories();
     fetchProductsFromDB();
