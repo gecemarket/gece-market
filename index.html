@@ -554,7 +554,7 @@
       z-index: 300;
       display: none;
       flex-direction: column;
-      padding: 16px;
+      padding: 14px;
       overflow-y: auto;
     }
     #adminModal.active { display: flex; }
@@ -599,9 +599,9 @@
     .order-sub-tab.active { background: #333; color: #fff; border-color: #666; }
     .order-card {
       background: #1e1e1e;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       border-left: 4px solid var(--warning);
       position: relative;
     }
@@ -620,7 +620,7 @@
       border: 1px solid #555;
       font-size: 0.75rem;
       font-weight: 700;
-      padding: 3px 8px;
+      padding: 4px 8px;
       border-radius: 4px;
       cursor: pointer;
     }
@@ -629,49 +629,69 @@
       color: #fff;
     }
 
-    /* TELEFON ARAMA BUTONU STİLİ */
     .btn-call-customer {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      gap: 6px;
       background: #28a745;
       color: #ffffff !important;
       text-decoration: none;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
       font-weight: 700;
-      margin-left: 6px;
-      vertical-align: middle;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      margin: 10px 0;
+      width: 100%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      cursor: pointer;
     }
-    .btn-call-customer:hover {
-      background: #218838;
+    .btn-call-customer:active {
+      background: #1e7e34;
     }
 
+    /* MOBİL VE MASAÜSTÜ ZAMAN ÇİZELGESİ (Responsive) */
     .timeline-box {
       background: #262626;
       border-radius: 8px;
-      padding: 8px 10px;
-      margin: 8px 0;
-      font-size: 0.78rem;
+      padding: 10px 12px;
+      margin: 10px 0;
+      font-size: 0.82rem;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       border: 1px solid #383838;
     }
     .timeline-row {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       color: #ccc;
+      flex-wrap: wrap;
+      gap: 4px;
     }
     .timeline-row b { color: #fff; }
     .timeline-row.highlight {
       border-top: 1px dashed #444;
-      padding-top: 4px;
-      margin-top: 2px;
+      padding-top: 6px;
+      margin-top: 4px;
       color: var(--secondary);
       font-weight: 700;
+    }
+
+    /* Mobil Ekranlara Özel Rahat Okunabilirlik */
+    @media (max-width: 600px) {
+      .timeline-box {
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .timeline-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .timeline-row b {
+        font-size: 0.88rem;
+      }
     }
 
     .admin-prod-card {
@@ -842,9 +862,10 @@
           <div class="summary-line total"><span>Genel Toplam:</span><span id="summaryGrandTotal">0 TL</span></div>
         </div>
 
+        <!-- Sadeleştirilmiş Adres Alanı -->
         <div class="info-input-group">
           <input type="text" id="custName" placeholder="Ad Soyad" />
-          <input type="text" id="custAddress" placeholder="Adres (Örn: A Blok Oda 302)" />
+          <input type="text" id="custAddress" placeholder="Adres" />
           <input 
             type="tel" 
             id="custPhone" 
@@ -1768,7 +1789,7 @@
       }
     }
 
-    // YÖNETİCİ PANELİNDE TEK TIKLA ARAMA BUTONLU SİPARİŞ LİSTESİ
+    // YÖNETİCİ PANELİ: HEM MOBİLDE HEM BİLGİSAYARDA EKSİKSİZ ÇALIŞAN ZAMAN ÇİZELGESİ
     function renderAdminOrdersUI() {
       const container = document.getElementById("adminOrdersContainer");
       const countLabel = document.getElementById("orderListCountLabel");
@@ -1802,24 +1823,27 @@
         const dispatchedDate = parseDateSafe(o.dispatched_at);
         const deliveredDate = parseDateSafe(o.delivered_at);
 
+        // Hazırlık süresi (dakika)
         let prepMin = o.prep_duration_minutes;
         if (!prepMin && dispatchedDate && createdAtDate) {
           prepMin = getPassedMinutes(createdAtDate, dispatchedDate);
         }
 
-        let activePrepDuration = "";
-        let activeRoadDuration = "";
+        // Aktif durumdayken geçen net dakikalar
+        let activePrepText = "";
+        let activeRoadText = "";
 
         if (o.status === "Hazırlanıyor" && createdAtDate) {
           const pass = getPassedMinutes(createdAtDate, now);
-          activePrepDuration = `⏳ ${pass} dakikadır hazırlanıyor`;
+          activePrepText = `⏳ ${pass} dakikadır hazırlanıyor`;
         }
 
         if (o.status === "Yola Çıktı" && dispatchedDate) {
           const pass = getPassedMinutes(dispatchedDate, now);
-          activeRoadDuration = `🛵 ${pass} dakikadır yolda`;
+          activeRoadText = `🛵 ${pass} dakikadır yolda`;
         }
 
+        // Teslim edilmiş sipariş süreleri
         let roadMin = o.road_duration_minutes;
         if (!roadMin && deliveredDate && dispatchedDate) {
           roadMin = getPassedMinutes(dispatchedDate, deliveredDate);
@@ -1836,37 +1860,37 @@
         if (o.status === "Teslim Edildi") cardClass = "archived";
         else if (o.status === "İptal Edildi") cardClass = "cancelled";
 
-        // Telefon numarasını ayıklayıp doğrudan arama linki oluşturma
         const phoneMatch = o.room_info ? o.room_info.match(/05\d{9}/) : null;
         const rawPhone = phoneMatch ? phoneMatch[0] : "";
 
         return `
           <div class="order-card ${cardClass}">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <b>#${o.id} - ${o.customer_name}</b>
               <div style="display:flex; align-items:center; gap:6px;">
-                <span style="font-size:0.75rem; background:#333; padding:2px 8px; border-radius:4px;">${o.status}</span>
+                <span style="font-size:0.75rem; background:#333; padding:3px 8px; border-radius:4px;">${o.status}</span>
                 <button class="order-card-delete-btn" title="Bu siparişi kalıcı olarak sil" onclick="adminDeleteOrderPermanently(${o.id})">Sil ✕</button>
               </div>
             </div>
 
+            <!-- TELEFONDA VE PC'DE TAM DÜZENLİ ZAMAN ÇİZELGESİ -->
             <div class="timeline-box">
               <div class="timeline-row">
-                <span>🕒 Sipariş Veriliş (TR):</span>
+                <span>🕒 Sipariş Saati (TR):</span>
                 <b>${formatDate(o.created_at)}</b>
               </div>
 
-              ${activePrepDuration ? `
+              ${activePrepText ? `
                 <div class="timeline-row" style="color:var(--warning); font-weight:700;">
-                  <span>Canlı Sayaç:</span>
-                  <span>${activePrepDuration}</span>
+                  <span>Hazırlık Süresi:</span>
+                  <span>${activePrepText}</span>
                 </div>
               ` : ''}
 
               ${dispatchedDate ? `
                 <div class="timeline-row">
-                  <span>🛵 Yola Çıkış Saati:</span>
-                  <b>${formatTimeOnly(o.dispatched_at)} <span style="color:#aaa;">(${prepMin ? prepMin + '. dk\'da verildi' : '-'})</span></b>
+                  <span>🛵 Yola Çıkış:</span>
+                  <b>${formatTimeOnly(o.dispatched_at)} <span style="color:#aaa;">(${prepMin ? prepMin + '. dk\'da kuryeye verildi' : '-'})</span></b>
                 </div>
               ` : (o.status === 'Hazırlanıyor' ? `
                 <div class="timeline-row" style="color:#888;">
@@ -1875,26 +1899,26 @@
                 </div>
               ` : '')}
 
-              ${activeRoadDuration ? `
+              ${activeRoadText ? `
                 <div class="timeline-row" style="color:var(--secondary); font-weight:700;">
-                  <span>Kurye Süresi:</span>
-                  <span>${activeRoadDuration}</span>
+                  <span>Yoldaki Süre:</span>
+                  <span>${activeRoadText}</span>
                 </div>
               ` : ''}
 
               ${deliveredDate ? `
                 <div class="timeline-row">
-                  <span>🏠 Teslim Ediliş:</span>
+                  <span>🏠 Teslim Saati:</span>
                   <b>${formatTimeOnly(o.delivered_at)}</b>
                 </div>
                 ${roadMin ? `
                   <div class="timeline-row">
-                    <span>⚡ Kuryenin Yoldaki Süresi:</span>
-                    <b>${roadMin} dakika</b>
+                    <span>⚡ Kurye Seyir Süresi:</span>
+                    <b>${roadMin} dakika sürdü</b>
                   </div>
                 ` : ''}
                 <div class="timeline-row highlight">
-                  <span>⏱️ Toplam Teslimat Süresi:</span>
+                  <span>⏱️ Toplam Teslimat:</span>
                   <span>${totalMin ? totalMin + ' dakika' : '1 dakika'}</span>
                 </div>
               ` : ''}
@@ -1907,11 +1931,16 @@
               ` : ''}
             </div>
             
-            <!-- Adres ve Tek Tıkla Arama Butonu -->
-            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap;">
+            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">
               <span>📍 ${o.room_info}</span>
-              ${rawPhone ? `<a href="tel:${rawPhone}" class="btn-call-customer">📞 ${rawPhone} Ara</a>` : ''}
             </div>
+
+            <!-- MOBİLDE NET GÖRÜNEN ARAMA BUTONU -->
+            ${rawPhone ? `
+              <a href="tel:${rawPhone}" class="btn-call-customer">
+                📞 Müşteriyi Ara (${rawPhone})
+              </a>
+            ` : ''}
 
             ${o.order_note ? `<div style="font-size:0.8rem; background:#2a2a2a; color:#ffd300; padding:6px; border-radius:4px; margin-bottom:6px;">📝 Not: ${o.order_note}</div>` : ''}
 
