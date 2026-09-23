@@ -60,10 +60,7 @@
       user-select: none;
       cursor: pointer;
     }
-    .logo-text {
-      font-size: 1.25rem;
-      font-weight: 800;
-    }
+    .logo-text { font-size: 1.25rem; font-weight: 800; }
     .badge-open {
       background: var(--secondary);
       color: #000;
@@ -149,16 +146,8 @@
       margin-bottom: 8px;
       overflow: hidden;
     }
-    .card-img-placeholder img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .card-img-placeholder svg {
-      width: 36px;
-      height: 36px;
-      fill: #aaa;
-    }
+    .card-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+    .card-img-placeholder svg { width: 36px; height: 36px; fill: #aaa; }
     .card-title {
       font-size: 0.9rem;
       font-weight: 600;
@@ -167,22 +156,14 @@
       height: 2.4em;
       overflow: hidden;
     }
-    .card-volume {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
+    .card-volume { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; }
     .card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-top: 6px;
     }
-    .card-price {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
+    .card-price { font-size: 1rem; font-weight: 700; color: var(--primary); }
     .btn-add {
       background: var(--surface);
       color: var(--primary);
@@ -437,7 +418,7 @@
     .status-yolda { background: #d1ecf1; color: #0c5460; }
     .status-teslim { background: #d4edda; color: #155724; }
 
-    /* Admin Paneli Stilleri */
+    /* Admin Paneli */
     #adminModal {
       position: fixed;
       inset: 0;
@@ -479,16 +460,16 @@
     .order-sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
     .order-sub-tab {
       flex: 1;
-      padding: 6px;
+      padding: 8px;
       border-radius: 6px;
       background: #222;
       color: #888;
       border: 1px solid #333;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
     }
-    .order-sub-tab.active { background: #333; color: #fff; border-color: #555; }
+    .order-sub-tab.active { background: #333; color: #fff; border-color: #666; }
     .order-card {
       background: #1e1e1e;
       border-radius: 8px;
@@ -498,7 +479,7 @@
     }
     .order-card.archived {
       border-left-color: #34c759;
-      opacity: 0.75;
+      opacity: 0.85;
     }
     .admin-prod-card {
       background: #1e1e1e;
@@ -507,12 +488,7 @@
       margin-bottom: 12px;
       border: 1px solid #2a2a2a;
     }
-    .admin-prod-top {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
+    .admin-prod-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
     .admin-prod-img {
       width: 55px;
       height: 55px;
@@ -591,15 +567,13 @@
     </div>
   </header>
 
-  <!-- Dinamik Kategori Barı -->
   <nav class="categories-bar" id="categoryContainer"></nav>
 
-  <!-- Ürün Listesi -->
   <main class="container" id="productGrid">
     <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted);">Ürünler yükleniyor...</div>
   </main>
 
-  <!-- Alt Bar -->
+  <!-- Alt Bar (Market, Sepetim, Siparişlerim) -->
   <nav class="bottom-nav">
     <div class="nav-item active" onclick="switchTab('market')">
       <div class="nav-icon">🏪</div>
@@ -683,11 +657,11 @@
     </div>
   </div>
 
-  <!-- Müşteri Sipariş Takip -->
+  <!-- Müşteri Siparişlerim (Geçmiş ve Canlı) -->
   <div class="modal-overlay" id="ordersOverlay">
     <div class="sheet-modal">
       <div class="sheet-header">
-        <h2 class="sheet-title">📦 Sipariş Durumu</h2>
+        <h2 class="sheet-title">📦 Siparişlerim</h2>
         <button class="btn-close" onclick="toggleOrders(false)">&times;</button>
       </div>
       <div id="customerOrderStatusArea" style="text-align:center; padding:16px 8px;">
@@ -696,14 +670,13 @@
     </div>
   </div>
 
-  <!-- Gelişmiş Yönetici Paneli -->
+  <!-- Yönetim Paneli -->
   <div id="adminModal">
     <div class="admin-header">
       <h2>🛵 Yönetim Paneli</h2>
       <button style="background:#333; color:#fff; border:none; padding:6px 12px; border-radius:6px;" onclick="closeAdmin()">Kapat</button>
     </div>
 
-    <!-- Dükkan Şalteri -->
     <div style="background:#1e1e1e; padding:12px; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
       <div>
         <div style="font-weight:700;">Dükkan: <span id="adminStoreStatusText">Açık</span></div>
@@ -712,14 +685,13 @@
       <button id="btnToggleStore" class="btn-adm" style="background:#ff3b30; color:#fff;" onclick="toggleStoreOpenClose()">Dükkanı Kapat</button>
     </div>
 
-    <!-- Sekmeler -->
     <div class="admin-tabs">
       <button class="admin-tab-btn active" id="tabBtnOrders" onclick="switchAdminTab('orders')">Siparişler 🛵</button>
       <button class="admin-tab-btn" id="tabBtnProducts" onclick="switchAdminTab('products')">Ürünler 🏷️</button>
       <button class="admin-tab-btn" id="tabBtnCategories" onclick="switchAdminTab('categories')">Kategoriler 📁</button>
     </div>
 
-    <!-- Sekme 1: Siparişler (Aktif ve Geçmiş) -->
+    <!-- Siparişler Sekmesi -->
     <div id="adminOrdersSection">
       <div class="order-sub-tabs">
         <button class="order-sub-tab active" id="subTabActive" onclick="switchOrderFilter('active')">Aktif Siparişler ⚡</button>
@@ -732,7 +704,7 @@
       <div id="adminOrdersContainer">Yükleniyor...</div>
     </div>
 
-    <!-- Sekme 2: Ürün Yönetimi -->
+    <!-- Ürün Yönetimi -->
     <div id="adminProductsSection" style="display:none;">
       <div class="admin-form-box">
         <h4 style="margin-bottom:8px; color:var(--secondary);">+ Yeni Ürün Ekle</h4>
@@ -749,7 +721,7 @@
       <div id="adminProductsContainer">Yükleniyor...</div>
     </div>
 
-    <!-- Sekme 3: Kategori Yönetimi -->
+    <!-- Kategori Yönetimi -->
     <div id="adminCategoriesSection" style="display:none;">
       <div class="admin-form-box">
         <h4 style="margin-bottom:8px; color:var(--secondary);">+ Yeni Kategori Ekle</h4>
@@ -778,12 +750,10 @@
     let cart = {};
     let selectedCategory = "Tümü";
     let isStoreOpen = true;
-    let currentOrderFilter = "active"; // active veya archived
+    let currentOrderFilter = "active";
 
-    // Varsayılan paket SVG ikonu (Görsel yoksa kullanılır)
     const DEFAULT_BOX_SVG = `<svg viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 8.9v6.52l6 3.38v-6.52L5 8.9zm14 6.52V8.9l-6 3.38v6.52l6-3.38z"/></svg>`;
 
-    // 1. Kategorileri Çek
     async function fetchCategories() {
       try {
         const res = await fetch(`${SUPABASE_BASE}/categories?order=id.asc`, {
@@ -818,7 +788,6 @@
       sel.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join("");
     }
 
-    // 2. Dükkan Durumu
     async function checkStoreStatus() {
       try {
         const res = await fetch(`${SUPABASE_BASE}/store_settings?id=eq.1`, {
@@ -866,7 +835,6 @@
       alert(isStoreOpen ? "Dükkan AÇILDI!" : "Dükkan KAPATILDI!");
     }
 
-    // 3. Ürünleri Çek
     async function fetchProductsFromDB() {
       try {
         const res = await fetch(`${SUPABASE_BASE}/products?is_active=eq.true&order=id.asc`, {
@@ -1137,7 +1105,10 @@
         const data = await response.json();
         const orderId = (data && data[0]) ? data[0].id : Math.floor(100 + Math.random() * 900);
 
-        localStorage.setItem("lastOrderId", orderId);
+        // Müşterinin cihazına sipariş ID'sini listeye ekle (Bütün geçmişi görsün)
+        let savedOrders = JSON.parse(localStorage.getItem("myOrdersList") || "[]");
+        savedOrders.unshift(orderId);
+        localStorage.setItem("myOrdersList", JSON.stringify(savedOrders));
 
         try {
           fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
@@ -1174,10 +1145,12 @@
       switchTab('orders');
     }
 
+    // Müşterinin Kendi Tüm Siparişlerini Listeleme
     async function loadCustomerOrders() {
       const area = document.getElementById("customerOrderStatusArea");
-      const lastId = localStorage.getItem("lastOrderId");
-      if (!lastId) {
+      const orderIds = JSON.parse(localStorage.getItem("myOrdersList") || "[]");
+
+      if (orderIds.length === 0) {
         area.innerHTML = `
           <div style="font-size:2.5rem; margin-bottom:8px;">🛒</div>
           <p style="color:var(--muted); font-size:0.9rem;">Henüz kayıtlı bir siparişiniz bulunmuyor.</p>
@@ -1185,52 +1158,48 @@
         return;
       }
 
-      area.innerHTML = "Sipariş durumu sorgulanıyor...";
+      area.innerHTML = "Siparişleriniz sorgulanıyor...";
 
       try {
-        const res = await fetch(`${SUPABASE_BASE}/orders?id=eq.${lastId}`, {
+        const idQuery = orderIds.slice(0, 10).join(",");
+        const res = await fetch(`${SUPABASE_BASE}/orders?id=in.(${idQuery})&order=id.desc`, {
           headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
         });
         const data = await res.json();
+
         if (!data || data.length === 0) {
-          area.innerHTML = "Sipariş bulunamadı.";
+          area.innerHTML = "Sipariş bilgisi bulunamadı.";
           return;
         }
 
-        const o = data[0];
-        let badgeClass = "status-hazirlaniyor";
-        let emoji = "⏳";
-        let desc = "Siparişiniz markette hazırlanıyor.";
+        area.innerHTML = data.map(o => {
+          let badgeClass = "status-hazirlaniyor";
+          let emoji = "⏳";
+          if (o.status === "Yola Çıktı") { badgeClass = "status-yolda"; emoji = "🛵"; }
+          else if (o.status === "Teslim Edildi") { badgeClass = "status-teslim"; emoji = "✅"; }
 
-        if (o.status === "Yola Çıktı") {
-          badgeClass = "status-yolda";
-          emoji = "🛵";
-          desc = "Kurye siparişinizle yola çıktı, kapınıza geliyor!";
-        } else if (o.status === "Teslim Edildi") {
-          badgeClass = "status-teslim";
-          emoji = "✅";
-          desc = "Siparişiniz teslim edildi. Afiyet olsun!";
-        }
+          return `
+            <div style="background:#f4f4f7; padding:12px; border-radius:10px; margin-bottom:12px; text-align:left;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b style="font-size:1rem;">#${o.id}</b>
+                <span class="status-badge ${badgeClass}" style="margin-top:0;">${emoji} ${o.status}</span>
+              </div>
+              <div style="margin:6px 0; font-size:0.85rem; color:#444;">📦 ${o.items}</div>
+              <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.9rem; margin-top:6px; border-top:1px dashed #ddd; padding-top:6px;">
+                <span>Toplam:</span>
+                <span>${o.total_amount} TL</span>
+              </div>
+            </div>
+          `;
+        }).join("") + `<button onclick="loadCustomerOrders()" style="margin-top:8px; background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700;">Yenile 🔄</button>`;
 
-        area.innerHTML = `
-          <div style="font-size:3rem; margin-bottom:8px;">${emoji}</div>
-          <h3 style="margin-bottom:6px;">Sipariş #${o.id}</h3>
-          <div class="status-badge ${badgeClass}">Durum: ${o.status}</div>
-          <p style="margin:14px 0 10px; font-size:0.85rem; color:var(--muted);">${desc}</p>
-          <div style="background:#f4f4f7; padding:10px; border-radius:8px; font-size:0.85rem; text-align:left; margin-top:12px;">
-            <div><b>Teslimat:</b> ${o.room_info}</div>
-            <div style="margin-top:4px;"><b>Ürünler:</b> ${o.items}</div>
-            <div style="margin-top:4px;"><b>Toplam:</b> ${o.total_amount} TL</div>
-          </div>
-          <button onclick="loadCustomerOrders()" style="margin-top:14px; background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700;">Durumu Yenile 🔄</button>
-        `;
       } catch (e) {
         area.innerHTML = "Hata: " + e.message;
       }
     }
 
     // ---------------------------------------------
-    // GÖREVLİ & YÖNETİCİ PANELİ (Gelişmiş)
+    // YÖNETİCİ PANELİ (Gelişmiş Sipariş ve Arşiv)
     // ---------------------------------------------
     let logoClicks = 0;
     let clickTimer = null;
@@ -1282,7 +1251,6 @@
       }
     }
 
-    // Sipariş Alt Filtresi: Aktif vs Geçmiş
     function switchOrderFilter(filter) {
       currentOrderFilter = filter;
       document.getElementById("subTabActive").classList.toggle("active", filter === 'active');
@@ -1290,13 +1258,14 @@
       loadAdminOrders();
     }
 
+    // Admin Siparişleri Yükleme
     async function loadAdminOrders() {
       const container = document.getElementById("adminOrdersContainer");
       const countLabel = document.getElementById("orderListCountLabel");
       container.innerHTML = "Siparişler yükleniyor...";
 
       try {
-        const res = await fetch(`${SUPABASE_BASE}/orders?select=*&order=id.desc&limit=100`, {
+        const res = await fetch(`${SUPABASE_BASE}/orders?select=*&order=id.desc&limit=150`, {
           headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
         });
         const allOrders = await res.json();
@@ -1307,7 +1276,6 @@
           return;
         }
 
-        // Aktif (Hazırlanıyor, Yola Çıktı) ve Geçmiş (Teslim Edildi) filtreleme
         const filtered = allOrders.filter(o => {
           if (currentOrderFilter === 'active') {
             return o.status === 'Hazırlanıyor' || o.status === 'Yola Çıktı';
@@ -1316,10 +1284,10 @@
           }
         });
 
-        countLabel.innerText = `${filtered.length} sipariş gösteriliyor`;
+        countLabel.innerText = `${filtered.length} sipariş listelendi`;
 
         if (filtered.length === 0) {
-          container.innerHTML = `<div style="text-align:center; padding:24px; color:#888;">${currentOrderFilter === 'active' ? 'Bekleyen aktif sipariş yok 🎉' : 'Geçmişte teslim edilmiş sipariş yok.'}</div>`;
+          container.innerHTML = `<div style="text-align:center; padding:24px; color:#888;">${currentOrderFilter === 'active' ? 'Bekleyen aktif sipariş yok 🎉' : 'Teslim edilmiş sipariş bulunmuyor.'}</div>`;
           return;
         }
 
@@ -1403,7 +1371,7 @@
     }
 
     async function adminChangePrice(id, name, oldPrice) {
-      const pStr = prompt(`${name} için yeni fiyatı giriniz (Mevcut: ${oldPrice} TL):`, oldPrice);
+      const pStr = prompt(`${name} için yeni fiyat (Mevcut: ${oldPrice} TL):`, oldPrice);
       if (!pStr) return;
       const newPrice = parseFloat(pStr);
       if (isNaN(newPrice) || newPrice <= 0) { alert("Geçersiz fiyat!"); return; }
@@ -1441,7 +1409,7 @@
     }
 
     async function adminDeleteProduct(id, name) {
-      if (!confirm(`"${name}" ürününü marketten kaldırmak istediğine emin misin?`)) return;
+      if (!confirm(`"${name}" ürününü marketten kaldırmak istediğinize emin misiniz?`)) return;
 
       await fetch(`${SUPABASE_BASE}/products?id=eq.${id}`, {
         method: "PATCH",
