@@ -133,7 +133,7 @@
     }
     .card-img-placeholder {
       width: 100%;
-      height: 80px;
+      height: 75px;
       background: #f0f0f4;
       border-radius: 8px;
       display: flex;
@@ -347,9 +347,6 @@
       font-size: 0.9rem;
       outline: none;
     }
-    .info-input-group input::placeholder {
-      color: #aaa;
-    }
     .btn-checkout {
       background: var(--success);
       color: white;
@@ -373,11 +370,10 @@
       text-align: center;
       margin-top: 6px;
     }
-    /* İkinci Onay Popup */
     #confirmOverlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.7);
       z-index: 250;
       display: none;
       align-items: center;
@@ -392,22 +388,21 @@
       border-radius: 16px;
       padding: 20px;
       width: 100%;
-      max-width: 360px;
+      max-width: 340px;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
     .confirm-card h3 {
-      font-size: 1.15rem;
-      margin-bottom: 8px;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
     }
     .confirm-card p {
       font-size: 0.85rem;
       color: var(--muted);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
     .confirm-btn-group {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
     .btn-confirm-yes {
       flex: 1;
@@ -421,7 +416,7 @@
     }
     .btn-confirm-no {
       flex: 1;
-      background: #f0f0f4;
+      background: #eee;
       color: var(--text);
       border: none;
       padding: 12px;
@@ -429,7 +424,6 @@
       font-weight: 700;
       cursor: pointer;
     }
-    /* Sipariş Alındı Kartı */
     .success-card {
       text-align: center;
       padding: 24px 12px;
@@ -442,7 +436,6 @@
       font-size: 3rem;
       margin-bottom: 12px;
     }
-    /* Müşteri Sipariş Durumu Modalı */
     #ordersModal {
       position: fixed;
       inset: 0;
@@ -473,7 +466,6 @@
     .status-hazirlaniyor { background: #fff3cd; color: #856404; }
     .status-yolda { background: #d1ecf1; color: #0c5460; }
     .status-teslim { background: #d4edda; color: #155724; }
-    /* Yönetici Paneli */
     #adminModal {
       position: fixed;
       inset: 0;
@@ -510,7 +502,6 @@
 </head>
 <body>
 
-  <!-- Üst Bar -->
   <header>
     <div class="top-bar">
       <div class="logo-area" onclick="handleLogoClick()">
@@ -520,11 +511,10 @@
       <button class="btn-header-orders" onclick="openCustomerOrders()">📦 Siparişim</button>
     </div>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Ürün ara (kola, gofret...)" oninput="filterProducts()" />
+      <input type="text" id="searchInput" placeholder="Ürün ara (kola, gofret...)" oninput="renderProducts()" />
     </div>
   </header>
 
-  <!-- Kategori Barı -->
   <nav class="categories-bar" id="categoryContainer">
     <button class="cat-pill active" onclick="setCategory('Tümü', this)">Tümü</button>
     <button class="cat-pill" onclick="setCategory('İçecekler', this)">İçecekler</button>
@@ -534,10 +524,8 @@
     <button class="cat-pill" style="border-color: var(--primary); color: var(--primary);" onclick="openCustomerOrders()">📦 Sipariş Takip</button>
   </nav>
 
-  <!-- Ürün Grid -->
   <main class="container" id="productGrid"></main>
 
-  <!-- Alt Sepet Çubuğu -->
   <aside class="floating-cart-bar" id="cartBar" style="display: none;">
     <div>
       <span class="cart-summary-title">Sepet Toplamı</span>
@@ -549,7 +537,6 @@
     </button>
   </aside>
 
-  <!-- Sepet Penceresi -->
   <div class="modal-overlay" id="cartOverlay">
     <div class="cart-modal">
       <div class="cart-header">
@@ -573,16 +560,14 @@
           <div class="summary-line total"><span>Genel Toplam:</span><span id="summaryGrandTotal">0 TL</span></div>
         </div>
 
-        <!-- İstenen 3 kutucuk -->
         <div class="info-input-group">
           <input type="text" id="custName" placeholder="Ad Soyad" />
           <input type="text" id="custAddress" placeholder="Adres (Yurt Adı / Blok - Oda No)" />
           <input 
             type="tel" 
             id="custPhone" 
-            placeholder="Telefon Numarası (05*********)" 
+            placeholder="Telefon No (05*********)" 
             maxlength="11" 
-            pattern="[0-9]*" 
             inputmode="numeric" 
             oninput="this.value = this.value.replace(/[^0-9]/g, '')"
           />
@@ -594,23 +579,21 @@
         <div class="warning-min" id="minOrderWarning"></div>
       </div>
 
-      <!-- Sipariş Alındı Bildirimi -->
       <div class="success-card" id="successCard">
         <div class="success-icon">🎉</div>
         <h3 style="margin-bottom: 8px;">Siparişiniz Alındı!</h3>
-        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">Siparişiniz markete ulaştı, durumu aşağıdaki butondan canlı takip edebilirsiniz.</p>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">Siparişiniz markete ulaştı, durumu canlı takip edebilirsiniz.</p>
         <div style="background: #f0f0f4; padding: 10px; border-radius: 8px; font-weight: 700; margin-bottom: 14px;" id="orderCodeText">Sipariş No: #</div>
         <button class="btn-checkout" style="background: var(--primary);" onclick="showLiveTrackingFromSuccess()">Siparişimin Durumunu Gör</button>
       </div>
     </div>
   </div>
 
-  <!-- Son Onay Popup'ı -->
   <div id="confirmOverlay">
     <div class="confirm-card">
       <div style="font-size: 2.2rem; margin-bottom: 8px;">❓</div>
       <h3>Siparişi onaylıyor musunuz?</h3>
-      <p id="confirmSummaryText">Siparişiniz oluşturulup markete iletilecektir.</p>
+      <p>Siparişiniz kuryeye iletilecektir.</p>
       <div class="confirm-btn-group">
         <button class="btn-confirm-no" onclick="closeConfirmModal()">Siparişe Devam Et</button>
         <button class="btn-confirm-yes" onclick="executeOrderSupabase()">Onaylıyorum</button>
@@ -618,7 +601,6 @@
     </div>
   </div>
 
-  <!-- Müşteri Siparişlerim Ekranı -->
   <div id="ordersModal">
     <div class="orders-sheet">
       <div class="cart-header">
@@ -631,7 +613,6 @@
     </div>
   </div>
 
-  <!-- Canlı Yönetici Paneli -->
   <div id="adminModal">
     <div class="admin-header">
       <h2>🛵 Canlı Sipariş Paneli</h2>
@@ -645,14 +626,6 @@
   </div>
 
   <script>
-    const SUPABASE_BASE = "https://mohzhmkucaucrhraoafv.supabase.co/rest/v1";
-    const SUPABASE_KEY = "sb_publishable_4Vm5rJr-aLRQnEnN1xsIBw_8uxbYyvp";
-    const ADMIN_PASSWORD = "5298030";
-
-    const MIN_ORDER_AMOUNT = 100;
-    const FREE_SHIPPING_LIMIT = 300;
-    const SHIPPING_FEE = 50;
-
     const products = [
       { id: 1, name: "Coca-Cola", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
       { id: 2, name: "Coca-Cola Zero", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
@@ -663,20 +636,45 @@
       { id: 7, name: "Niğde Gazozu", volume: "250 ml", price: 20, category: "İçecekler", icon: "🍾" },
       { id: 8, name: "Pepsi", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
       { id: 9, name: "7UP", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
-      { id: 10, name: "Schweppes Mandalina", volume: "1 L", price: 55, category: "İçecekler", icon: "🍊" },
-      { id: 11, name: "Lays Klasik Paket", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🥔" },
+      { id: 10, name: "Schweppes", volume: "1 L", price: 55, category: "İçecekler", icon: "🍊" },
+      { id: 11, name: "Lays Klasik", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🥔" },
       { id: 12, name: "Doritos Nacho", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🧀" },
       { id: 13, name: "Ruffles Ketçap", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🍟" },
-      { id: 14, name: "Ülker Çikolatalı Gofret", volume: "Standart", price: 12, category: "Atıştırmalık", icon: "🍫" },
+      { id: 14, name: "Çikolatalı Gofret", volume: "Standart", price: 12, category: "Atıştırmalık", icon: "🍫" },
       { id: 15, name: "Üçgen Peynir", volume: "8'li", price: 45, category: "Kahvaltılık", icon: "🧀" },
       { id: 16, name: "Tost Ekmeği", volume: "Büyük Boy", price: 35, category: "Kahvaltılık", icon: "🍞" },
       { id: 17, name: "Çokoprens", volume: "10'lu", price: 30, category: "Kahvaltılık", icon: "🍪" },
       { id: 18, name: "Islak Mendil", volume: "Paket", price: 25, category: "Kişisel", icon: "🧻" },
       { id: 19, name: "Cep Mendili", volume: "10'lu", price: 15, category: "Kişisel", icon: "🤧" },
-      { id: 20, name: "Diş Fırçası & Macun", volume: "Set", price: 70, category: "Kişisel", icon: "🪥" }
+      { id: 20, name: "Diş Fırçası Seti", volume: "Set", price: 70, category: "Kişisel", icon: "🪥" }
     ];
 
     let cart = {};
     let selectedCategory = "Tümü";
 
-  
+    const SUPABASE_BASE = "https://mohzhmkucaucrhraoafv.supabase.co/rest/v1";
+    const SUPABASE_KEY = "sb_publishable_4Vm5rJr-aLRQnEnN1xsIBw_8uxbYyvp";
+    const ADMIN_PASSWORD = "5298030";
+
+    const MIN_ORDER_AMOUNT = 100;
+    const FREE_SHIPPING_LIMIT = 300;
+    const SHIPPING_FEE = 50;
+
+    function renderProducts() {
+      const grid = document.getElementById("productGrid");
+      if (!grid) return;
+      const searchEl = document.getElementById("searchInput");
+      const query = searchEl ? searchEl.value.toLowerCase() : "";
+      
+      const filtered = products.filter(p => {
+        const matchesCat = selectedCategory === "Tümü" || p.category === selectedCategory;
+        const matchesSearch = p.name.toLowerCase().includes(query);
+        return matchesCat && matchesSearch;
+      });
+
+      grid.innerHTML = filtered.map(p => {
+        const qty = cart[p.id] || 0;
+        return `
+          <div class="card">
+            <div>
+ 
