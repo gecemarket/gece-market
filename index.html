@@ -135,19 +135,27 @@
       position: relative;
     }
     .card.out-of-stock { opacity: 0.6; }
+
     .card-img-placeholder {
       width: 100%;
-      height: 95px;
-      background: #f0f0f4;
+      height: 115px;
+      background: #fafafc;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 8px;
       overflow: hidden;
+      padding: 4px;
     }
-    .card-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+    .card-img-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
     .card-img-placeholder svg { width: 36px; height: 36px; fill: #aaa; }
+
     .card-title {
       font-size: 0.9rem;
       font-weight: 600;
@@ -494,6 +502,7 @@
       border: 1px solid #2a2a2a;
     }
     .admin-prod-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+
     .admin-prod-img {
       width: 55px;
       height: 55px;
@@ -503,9 +512,15 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      padding: 2px;
     }
-    .admin-prod-img img { width: 100%; height: 100%; object-fit: cover; }
+    .admin-prod-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
     .admin-prod-img svg { width: 28px; height: 28px; fill: #888; }
+
     .admin-prod-ctrls { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
     .btn-adm {
       border: none;
@@ -533,6 +548,26 @@
       font-size: 0.85rem;
       outline: none;
     }
+
+    /* Canlı Önizleme Kutusu */
+    .preview-wrapper {
+      background: #161616;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0 14px;
+      border: 1px solid #333;
+    }
+    .preview-header {
+      font-size: 0.75rem;
+      color: #888;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
     .cat-chip-adm {
       display: inline-flex;
       align-items: center;
@@ -594,7 +629,6 @@
     </div>
   </nav>
 
-  <!-- Sepet -->
   <div class="modal-overlay" id="cartOverlay">
     <div class="sheet-modal">
       <div class="sheet-header">
@@ -649,7 +683,6 @@
     </div>
   </div>
 
-  <!-- Onay Pop-up -->
   <div id="confirmOverlay">
     <div class="confirm-card">
       <div style="font-size: 2.2rem; margin-bottom: 8px;">❓</div>
@@ -662,7 +695,6 @@
     </div>
   </div>
 
-  <!-- Müşteri Siparişlerim -->
   <div class="modal-overlay" id="ordersOverlay">
     <div class="sheet-modal">
       <div class="sheet-header">
@@ -675,7 +707,6 @@
     </div>
   </div>
 
-  <!-- Yönetim Paneli -->
   <div id="adminModal">
     <div class="admin-header">
       <h2>🛵 Yönetim Paneli</h2>
@@ -708,16 +739,41 @@
       <div id="adminOrdersContainer">Yükleniyor...</div>
     </div>
 
+    <!-- Ürün Yönetimi ve Canlı Önizleme -->
     <div id="adminProductsSection" style="display:none;">
       <div class="admin-form-box">
         <h4 style="margin-bottom:8px; color:var(--secondary);">+ Yeni Ürün Ekle</h4>
-        <input type="text" id="newProdName" placeholder="Ürün Adı (Örn: Lipton Şeftali)" />
+        <input type="text" id="newProdName" placeholder="Ürün Adı (Örn: Lipton Şeftali)" oninput="updateProductPreview()" />
         <div style="display:flex; gap:6px;">
-          <input type="text" id="newProdVolume" placeholder="Boyut/Gram (Örn: 330 ml)" style="flex:1;" />
-          <input type="number" id="newProdPrice" placeholder="Fiyat TL (Örn: 35)" style="flex:1;" />
+          <input type="text" id="newProdVolume" placeholder="Boyut/Gram (Örn: 330 ml)" style="flex:1;" oninput="updateProductPreview()" />
+          <input type="number" id="newProdPrice" placeholder="Fiyat TL (Örn: 35)" style="flex:1;" oninput="updateProductPreview()" />
         </div>
-        <select id="newProdCatSelect"></select>
-        <input type="text" id="newProdImage" placeholder="Fotoğraf URL Bağlantısı (İsteğe bağlı)" />
+        <select id="newProdCatSelect" onchange="updateProductPreview()"></select>
+        <input type="text" id="newProdImage" placeholder="Fotoğraf URL Bağlantısı" oninput="updateProductPreview()" />
+
+        <!-- Canlı Kart Önizlemesi -->
+        <div class="preview-wrapper">
+          <div class="preview-header">
+            <span>Canlı Görünüm Önizlemesi</span>
+            <span id="previewStatusText" style="color:#aaa;">Görsel bekleniyor</span>
+          </div>
+          <div style="max-width: 175px; margin: 0 auto;">
+            <div class="card" style="background:#fff; color:#191919; margin:0;">
+              <div>
+                <div class="card-img-placeholder" id="previewImgBox">
+                  <svg viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 8.9v6.52l6 3.38v-6.52L5 8.9zm14 6.52V8.9l-6 3.38v6.52l6-3.38z"/></svg>
+                </div>
+                <div class="card-title" id="previewTitle">Ürün Adı</div>
+                <div class="card-volume" id="previewVolume">Standart</div>
+              </div>
+              <div class="card-footer">
+                <span class="card-price" id="previewPrice">0 TL</span>
+                <button class="btn-add" style="pointer-events:none;">Ekle</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button class="btn-checkout" style="padding:10px; margin-top:4px;" onclick="submitNewProduct()">Ürünü Ekle</button>
       </div>
       <div style="margin-bottom:10px; font-weight:700;">Yayındaki Ürünler:</div>
@@ -753,7 +809,7 @@
     let selectedCategory = "Tümü";
     let isStoreOpen = true;
     let currentOrderFilter = "active";
-    let adminOrdersData = []; // Verileri tam obje olarak saklayıp hatasız süre hesaplamak için
+    let adminOrdersData = [];
 
     const DEFAULT_BOX_SVG = `<svg viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 8.9v6.52l6 3.38v-6.52L5 8.9zm14 6.52V8.9l-6 3.38v6.52l6-3.38z"/></svg>`;
 
@@ -763,6 +819,43 @@
       if (isNaN(d.getTime())) return "-";
       return d.toLocaleDateString("tr-TR", { day: '2-digit', month: '2-digit', year: 'numeric' }) + " " +
              d.toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Canlı Önizleme Fonksiyonu
+    function updateProductPreview() {
+      const name = document.getElementById("newProdName").value.trim() || "Ürün Adı";
+      const volume = document.getElementById("newProdVolume").value.trim() || "Standart";
+      const price = document.getElementById("newProdPrice").value.trim() || "0";
+      const url = document.getElementById("newProdImage").value.trim();
+
+      document.getElementById("previewTitle").innerText = name;
+      document.getElementById("previewVolume").innerText = volume;
+      document.getElementById("previewPrice").innerText = `${price} TL`;
+
+      const imgBox = document.getElementById("previewImgBox");
+      const statusText = document.getElementById("previewStatusText");
+
+      if (url) {
+        statusText.innerText = "Yükleniyor...";
+        statusText.style.color = "#ffd300";
+
+        const tempImg = new Image();
+        tempImg.onload = function() {
+          imgBox.innerHTML = `<img src="${url}" alt="Önizleme" />`;
+          statusText.innerText = "Görsel Uygun ✓";
+          statusText.style.color = "#34c759";
+        };
+        tempImg.onerror = function() {
+          imgBox.innerHTML = DEFAULT_BOX_SVG;
+          statusText.innerText = "Geçersiz Link ✕";
+          statusText.style.color = "#ff3b30";
+        };
+        tempImg.src = url;
+      } else {
+        imgBox.innerHTML = DEFAULT_BOX_SVG;
+        statusText.innerText = "Varsayılan Simge";
+        statusText.style.color = "#aaa";
+      }
     }
 
     async function fetchCategories() {
@@ -1090,7 +1183,7 @@
       btn.innerText = "Sipariş Alınıyor...";
 
       try {
-        const nowIso = new Date().toISOString(); // Kesin sipariş oluşturulma zaman damgası
+        const nowIso = new Date().toISOString();
 
         const response = await fetch(`${SUPABASE_BASE}/orders`, {
           method: "POST",
@@ -1333,6 +1426,7 @@
       } else if (tab === 'products') {
         document.getElementById("tabBtnProducts").classList.add("active");
         document.getElementById("adminProductsSection").style.display = "block";
+        updateProductPreview();
         loadAdminProducts();
       } else if (tab === 'categories') {
         document.getElementById("tabBtnCategories").classList.add("active");
@@ -1482,7 +1576,6 @@
       loadAdminOrders();
     }
 
-    // Ürün Yönetimi
     async function loadAdminProducts() {
       const container = document.getElementById("adminProductsContainer");
       container.innerHTML = "Ürünler yükleniyor...";
@@ -1609,6 +1702,7 @@
       document.getElementById("newProdPrice").value = "";
       document.getElementById("newProdImage").value = "";
 
+      updateProductPreview();
       loadAdminProducts();
       fetchProductsFromDB();
     }
