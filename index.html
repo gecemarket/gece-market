@@ -71,15 +71,46 @@
       text-transform: uppercase;
     }
     .badge-closed {
-      background: #444;
-      color: #ff3b30;
+      background: #333;
+      color: #ff6b6b;
       font-size: 0.7rem;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 20px;
       text-transform: uppercase;
-      border: 1px solid #ff3b30;
+      border: 1px solid #ff6b6b;
     }
+
+    /* İnce Fontlu Dükkan Çalışma Saatleri Duyuru Bandı */
+    #storeScheduleBanner {
+      display: none;
+      background: #231d38;
+      color: #e2daf8;
+      border-bottom: 1px solid #3c325c;
+      padding: 12px 16px;
+      text-align: center;
+    }
+    .schedule-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 3px;
+      color: #ffd300;
+    }
+    .schedule-hours {
+      font-size: 0.8rem;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    .schedule-desc {
+      font-size: 0.74rem;
+      font-weight: 300;
+      color: #bbb0d6;
+      line-height: 1.35;
+    }
+
     .search-box input {
       width: 100%;
       padding: 10px 14px;
@@ -682,6 +713,16 @@
     </div>
   </header>
 
+  <!-- İNCE ZARİF ÇALIŞMA SAATLERİ DUYURUSU (12:00 - 06:00) -->
+  <div id="storeScheduleBanner">
+    <div class="schedule-title">🌙 Gece Market Dinleniyor</div>
+    <div class="schedule-hours">Çalışma Saatlerimiz: 12:00 – 06:00 (18 Saat Kesintisiz)</div>
+    <div class="schedule-desc">
+      Sipariş alımımız bugün saat 12:00'de başlayacaktır.<br>
+      Ürünlerimizi inceleyebilir, sepetinizi hazırlayabilirsiniz.
+    </div>
+  </div>
+
   <nav class="categories-bar" id="categoryContainer"></nav>
 
   <main class="container" id="productGrid">
@@ -704,6 +745,7 @@
     </div>
   </nav>
 
+  <!-- Sepet -->
   <div class="modal-overlay" id="cartOverlay">
     <div class="sheet-modal">
       <div class="sheet-header">
@@ -791,9 +833,9 @@
     <div style="background:#1e1e1e; padding:12px; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
       <div>
         <div style="font-weight:700;">Dükkan: <span id="adminStoreStatusText">Açık</span></div>
-        <div style="font-size:0.75rem; color:#888;">Kapalıyken sipariş alınmaz.</div>
+        <div style="font-size:0.75rem; color:#888;">Çalışma Saatleri: 12:00 – 06:00 (18 Saat Açık)</div>
       </div>
-      <button id="btnToggleStore" class="btn-adm" style="background:#ff3b30; color:#fff;" onclick="toggleStoreOpenClose()">Dükkanı Kapat</button>
+      <button id="btnToggleStore" class="btn-adm" style="background:#ff3b30; color:#fff;" onclick="toggleStoreOpenClose()">Manuel Kapat</button>
     </div>
 
     <div class="admin-tabs">
@@ -876,6 +918,10 @@
     const FREE_SHIPPING_LIMIT = 300;
     const SHIPPING_FEE = 50;
 
+    // GÜNCELLENEN ÇALIŞMA SAATLERİ (12:00 - 06:00 -> 18 SAAT AÇIK)
+    const OPEN_HOUR = 12;
+    const CLOSE_HOUR = 6;
+
     let products = [];
     let categories = [];
     let cart = {};
@@ -909,14 +955,73 @@
       return d.toLocaleTimeString("tr-TR", { timeZone: "Europe/Istanbul", hour: "2-digit", minute: "2-digit" });
     }
 
-    // DAKİKA FARKINI KESİN VE NET HESAPLAYAN MOTOR
     function getPassedMinutes(fromDate, toDate = new Date()) {
       if (!fromDate) return 0;
       const diffMs = toDate.getTime() - fromDate.getTime();
       if (diffMs <= 0) return 1;
-      // Saniye yuvarlama hatasını engellemek için doğrudan geçen tam dakika + 1 saniye bile geçmişse 1. dakika mantığı
       const mins = Math.floor(diffMs / 60000);
       return mins <= 0 ? 1 : mins;
+    }
+
+    // 12:00 - 06:00 (18 Saat Açık Kontrolü)
+    function isWithinWorkingHours() {
+      const trDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" }));
+      const hour = trDate.getHours();
+      // Öğlen 12:00'den gece 23:59'a kadar veya gece yarısından sabah 06:00'ya kadar açık
+      return (hour >= OPEN_HOUR || hour < CLOSE_HOUR);
+    }
+
+    async function checkStoreStatus() {
+      let dbOpen = true;
+      try {
+        const res = await fetch(`${SUPABASE_BASE}/store_settings?id=eq.1`, {
+          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+        });
+        const data = await res.json();
+        if (data && data.length > 0) dbOpen = data[0].is_open;
+      } catch (e) {}
+
+      isStoreOpen = dbOpen && isWithinWorkingHours();
+      updateStoreStatusUI();
+    }
+
+    function updateStoreStatusUI() {
+      const badge = document.getElementById("storeStatusBadge");
+      const banner = document.getElementById("storeScheduleBanner");
+      const admText = document.getElementById("adminStoreStatusText");
+      const admBtn = document.getElementById("btnToggleStore");
+      const checkoutBtn = document.getElementById("btnCheckout");
+      const minWarning = document.getElementById("minOrderWarning");
+
+      if (isStoreOpen) {
+        badge.className = "badge-open";
+        badge.innerText = "AÇIK";
+        if (banner) banner.style.display = "none";
+        if (admText) admText.innerText = "Açık (Sipariş alınıyor - 12:00 / 06:00)";
+        if (admBtn) { admBtn.style.background = "#ff3b30"; admBtn.innerText = "Manuel Kapat"; }
+      } else {
+        badge.className = "badge-closed";
+        badge.innerText = "KAPALI";
+        if (banner) banner.style.display = "block";
+        if (admText) admText.innerText = "Kapalı (Mesai dışı / Kapalı)";
+        if (admBtn) { admBtn.style.background = "#34c759"; admBtn.innerText = "Manuel Aç"; }
+        if (checkoutBtn) {
+          checkoutBtn.disabled = true;
+          minWarning.innerText = "Dükkanımız şu an kapalıdır. Çalışma saatlerimiz: 12:00 – 06:00";
+        }
+      }
+    }
+
+    async function toggleStoreOpenClose() {
+      const newStatus = !isStoreOpen;
+      await fetch(`${SUPABASE_BASE}/store_settings?id=eq.1`, {
+        method: "PATCH",
+        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ is_open: newStatus })
+      });
+      isStoreOpen = newStatus;
+      updateStoreStatusUI();
+      alert(isStoreOpen ? "Dükkan manuel olarak AÇILDI!" : "Dükkan manuel olarak KAPATILDI!");
     }
 
     function updateProductPreview() {
@@ -984,53 +1089,6 @@
       const sel = document.getElementById("newProdCatSelect");
       if (!sel) return;
       sel.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join("");
-    }
-
-    async function checkStoreStatus() {
-      try {
-        const res = await fetch(`${SUPABASE_BASE}/store_settings?id=eq.1`, {
-          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-        });
-        const data = await res.json();
-        if (data && data.length > 0) isStoreOpen = data[0].is_open;
-      } catch (e) {}
-      updateStoreStatusUI();
-    }
-
-    function updateStoreStatusUI() {
-      const badge = document.getElementById("storeStatusBadge");
-      const admText = document.getElementById("adminStoreStatusText");
-      const admBtn = document.getElementById("btnToggleStore");
-      const checkoutBtn = document.getElementById("btnCheckout");
-      const minWarning = document.getElementById("minOrderWarning");
-
-      if (isStoreOpen) {
-        badge.className = "badge-open";
-        badge.innerText = "AÇIK";
-        if (admText) admText.innerText = "Açık (Sipariş alınıyor)";
-        if (admBtn) { admBtn.style.background = "#ff3b30"; admBtn.innerText = "Dükkanı Kapat"; }
-      } else {
-        badge.className = "badge-closed";
-        badge.innerText = "KAPALI";
-        if (admText) admText.innerText = "Kapalı (Sipariş kapalı)";
-        if (admBtn) { admBtn.style.background = "#34c759"; admBtn.innerText = "Dükkanı Aç"; }
-        if (checkoutBtn) {
-          checkoutBtn.disabled = true;
-          minWarning.innerText = "Market şu anda kapalıdır, sipariş kabul edilmemektedir.";
-        }
-      }
-    }
-
-    async function toggleStoreOpenClose() {
-      const newStatus = !isStoreOpen;
-      await fetch(`${SUPABASE_BASE}/store_settings?id=eq.1`, {
-        method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ is_open: newStatus })
-      });
-      isStoreOpen = newStatus;
-      updateStoreStatusUI();
-      alert(isStoreOpen ? "Dükkan AÇILDI!" : "Dükkan KAPATILDI!");
     }
 
     async function fetchProductsFromDB() {
@@ -1191,7 +1249,7 @@
 
       if (!isStoreOpen) {
         checkoutBtn.disabled = true;
-        warningText.innerText = "Market şu anda kapalıdır, sipariş kabul edilmemektedir.";
+        warningText.innerText = "Dükkanımız şu an kapalıdır. Çalışma saatlerimiz: 12:00 – 06:00";
       } else if (subtotal < MIN_ORDER_AMOUNT) {
         checkoutBtn.disabled = true;
         warningText.innerText = `Minimum sipariş tutarı ${MIN_ORDER_AMOUNT} TL'dir.`;
@@ -1238,7 +1296,7 @@
 
     function askOrderConfirmation() {
       if (!isStoreOpen) {
-        alert("Market şu an kapalıdır!");
+        alert("Market şu an kapalıdır! Çalışma saatlerimiz: 12:00 – 06:00");
         return;
       }
       const name = document.getElementById("custName").value.trim();
@@ -1515,7 +1573,6 @@
       updateStoreStatusUI();
       switchAdminTab('orders');
       
-      // Panel açık kaldığında süreleri her 30 saniyede bir otomatik canlandır
       clearInterval(adminAutoRefreshTimer);
       adminAutoRefreshTimer = setInterval(() => {
         if (document.getElementById("adminModal").classList.contains("active") && currentOrderFilter === 'active') {
@@ -1581,7 +1638,6 @@
       }
     }
 
-    // YÖNETİCİ PANELİ: DAKİKASI DAKİKASINA DOĞRU CANLI SÜRE GÖSTERİMİ
     function renderAdminOrdersUI() {
       const container = document.getElementById("adminOrdersContainer");
       const countLabel = document.getElementById("orderListCountLabel");
@@ -1615,13 +1671,11 @@
         const dispatchedDate = parseDateSafe(o.dispatched_at);
         const deliveredDate = parseDateSafe(o.delivered_at);
 
-        // Hazırlık süresi (yola çıkana kadar geçen süre)
         let prepMin = o.prep_duration_minutes;
         if (!prepMin && dispatchedDate && createdAtDate) {
           prepMin = getPassedMinutes(createdAtDate, dispatchedDate);
         }
 
-        // Aktif durumdayken anlık geçen net süreler
         let activePrepDuration = "";
         let activeRoadDuration = "";
 
@@ -1635,7 +1689,6 @@
           activeRoadDuration = `🛵 ${pass} dakikadır yolda`;
         }
 
-        // Teslim edilmiş sipariş süreleri
         let roadMin = o.road_duration_minutes;
         if (!roadMin && deliveredDate && dispatchedDate) {
           roadMin = getPassedMinutes(dispatchedDate, deliveredDate);
