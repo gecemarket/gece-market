@@ -317,7 +317,6 @@
       transition: width 0.3s ease;
     }
 
-    /* SEPET LİSTESİ VE MİNİ RESİMLER */
     .cart-items { flex: 1; overflow-y: auto; margin-bottom: 14px; }
     .cart-item {
       display: flex;
@@ -658,7 +657,7 @@
     </div>
   </nav>
 
-  <!-- Sepet (Fotoğraflı) -->
+  <!-- Sepet -->
   <div class="modal-overlay" id="cartOverlay">
     <div class="sheet-modal">
       <div class="sheet-header">
@@ -841,7 +840,6 @@
 
     const DEFAULT_BOX_SVG = `<svg viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 8.9v6.52l6 3.38v-6.52L5 8.9zm14 6.52V8.9l-6 3.38v6.52l6-3.38z"/></svg>`;
 
-    // TÜRKİYE YEREL SAATİNİ (UTC+3) NET HESAPLAYAN FORMATLAYICI
     function formatDate(isoStr) {
       if (!isoStr) return "-";
       const d = new Date(isoStr);
@@ -1052,7 +1050,6 @@
       renderProducts();
     }
 
-    // SEPET GÜNCELLEMESİ (Fotoğraflı)
     function updateCartUI() {
       let subtotal = 0;
       let totalCount = 0;
@@ -1610,7 +1607,6 @@
       loadAdminOrders();
     }
 
-    // Ürün Yönetimi (İsim Değiştirme Butonlu)
     async function loadAdminProducts() {
       const container = document.getElementById("adminProductsContainer");
       container.innerHTML = "Ürünler yükleniyor...";
@@ -1656,7 +1652,6 @@
       }
     }
 
-    // Ürün Adını Değiştirme
     async function adminChangeName(id, encodedOldName) {
       const oldName = decodeURIComponent(encodedOldName);
       const newName = prompt(`Ürünün yeni adını giriniz:`, oldName);
@@ -1729,12 +1724,12 @@
       loadAdminProducts();
     }
 
-    // Yeni Ürün Ekleme (Anında Ana Sayfaya Düşüren Garanti Yöntem)
+    // Ürün ekleme fonksiyonu (Gerçek hata detayını veren sürüm)
     async function submitNewProduct() {
       const name = document.getElementById("newProdName").value.trim();
       const volume = document.getElementById("newProdVolume").value.trim() || "Standart";
       const price = parseFloat(document.getElementById("newProdPrice").value);
-      const category = document.getElementById("newProdCatSelect").value;
+      const category = document.getElementById("newProdCatSelect").value || "Genel";
       const imageUrl = document.getElementById("newProdImage").value.trim() || null;
       const btn = document.getElementById("btnAddNewProductSubmit");
 
@@ -1766,8 +1761,11 @@
           })
         });
 
+        const resData = await res.json();
+
         if (!res.ok) {
-          throw new Error("Ürün eklenemedi, veritabanı izinlerini kontrol ediniz.");
+          const errMsg = resData.message || resData.error || resData.hint || JSON.stringify(resData);
+          throw new Error(errMsg);
         }
 
         alert(`"${name}" başarıyla eklendi!`);
@@ -1777,11 +1775,11 @@
         document.getElementById("newProdImage").value = "";
 
         updateProductPreview();
-        await fetchProductsFromDB(); // Ana sayfa vitrinini hemen yenile
-        loadAdminProducts(); // Panel listesini hemen yenile
+        await fetchProductsFromDB();
+        loadAdminProducts();
 
       } catch (err) {
-        alert("Hata: " + err.message);
+        alert("Supabase Hatası: " + err.message);
       } finally {
         btn.disabled = false;
         btn.innerText = "Ürünü Ekle";
