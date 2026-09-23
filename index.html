@@ -12,7 +12,7 @@
       --bg: #f5f5f7;
       --surface: #ffffff;
       --text: #191919;
-      --muted: #6e6e73;
+      --muted: #8e8e93;
       --border: #e5e5ea;
       --danger: #ff3b30;
       --success: #34c759;
@@ -28,7 +28,7 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      padding-bottom: 90px;
+      padding-bottom: 75px; /* Alt bar payı */
     }
     header {
       background-color: var(--primary);
@@ -65,16 +65,6 @@
       padding: 3px 8px;
       border-radius: 20px;
       text-transform: uppercase;
-    }
-    .btn-header-orders {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      color: white;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 16px;
-      cursor: pointer;
     }
     .search-box input {
       width: 100%;
@@ -139,7 +129,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
+      font-size: 2.2rem;
       margin-bottom: 8px;
     }
     .card-title {
@@ -171,7 +161,7 @@
       color: var(--primary);
       border: 1.5px solid var(--primary);
       font-weight: 700;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 8px;
       cursor: pointer;
     }
@@ -201,39 +191,56 @@
       min-width: 20px;
       text-align: center;
     }
-    .floating-cart-bar {
+
+    /* Alt Gezinme Barı (Trendyol / Getir stili) */
+    .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
+      height: 60px;
       background: var(--surface);
       border-top: 1px solid var(--border);
-      padding: 10px 16px;
       display: flex;
+      justify-content: space-around;
       align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
-      z-index: 100;
+      z-index: 150;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
     }
-    .cart-summary-title {
-      font-size: 0.8rem;
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       color: var(--muted);
-      display: block;
-    }
-    .cart-summary-price {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--text);
-    }
-    .btn-open-cart {
-      background: var(--primary);
-      color: white;
-      border: none;
-      font-weight: 700;
-      padding: 12px 20px;
-      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
+      flex: 1;
+      position: relative;
     }
+    .nav-item.active {
+      color: var(--primary);
+    }
+    .nav-icon {
+      font-size: 1.3rem;
+      margin-bottom: 2px;
+    }
+    .nav-badge {
+      position: absolute;
+      top: -2px;
+      right: calc(50% - 18px);
+      background: var(--danger);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 6px;
+      display: none;
+    }
+
+    /* Modallar */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -246,21 +253,22 @@
     .modal-overlay.active {
       display: flex;
     }
-    .cart-modal {
+    .sheet-modal {
       background: var(--surface);
       border-radius: 16px 16px 0 0;
       padding: 18px 16px 24px;
       max-height: 85vh;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
     }
-    .cart-header {
+    .sheet-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
     }
-    .cart-title {
+    .sheet-title {
       font-size: 1.15rem;
       font-weight: 700;
     }
@@ -370,6 +378,8 @@
       text-align: center;
       margin-top: 6px;
     }
+
+    /* İkinci Onay Kartı */
     #confirmOverlay {
       position: fixed;
       inset: 0;
@@ -391,18 +401,10 @@
       max-width: 340px;
       text-align: center;
     }
-    .confirm-card h3 {
-      font-size: 1.1rem;
-      margin-bottom: 6px;
-    }
-    .confirm-card p {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
     .confirm-btn-group {
       display: flex;
       gap: 8px;
+      margin-top: 16px;
     }
     .btn-confirm-yes {
       flex: 1;
@@ -424,6 +426,8 @@
       font-weight: 700;
       cursor: pointer;
     }
+
+    /* Sipariş Alındı Kartı */
     .success-card {
       text-align: center;
       padding: 24px 12px;
@@ -432,29 +436,8 @@
     .success-card.active {
       display: block;
     }
-    .success-icon {
-      font-size: 3rem;
-      margin-bottom: 12px;
-    }
-    #ordersModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 210;
-      display: none;
-      justify-content: flex-end;
-      flex-direction: column;
-    }
-    #ordersModal.active {
-      display: flex;
-    }
-    .orders-sheet {
-      background: var(--surface);
-      border-radius: 16px 16px 0 0;
-      padding: 18px 16px 24px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
+
+    /* Sipariş Durumu */
     .status-badge {
       display: inline-block;
       padding: 6px 14px;
@@ -466,6 +449,8 @@
     .status-hazirlaniyor { background: #fff3cd; color: #856404; }
     .status-yolda { background: #d1ecf1; color: #0c5460; }
     .status-teslim { background: #d4edda; color: #155724; }
+
+    /* Admin Paneli */
     #adminModal {
       position: fixed;
       inset: 0;
@@ -495,52 +480,138 @@
       margin-bottom: 12px;
       border-left: 4px solid var(--warning);
     }
-    .order-card.hazirlaniyor { border-color: var(--warning); }
-    .order-card.yolda { border-color: var(--primary); }
-    .order-card.teslim { border-color: var(--success); opacity: 0.6; }
   </style>
 </head>
 <body>
 
+  <!-- Üst Bar -->
   <header>
     <div class="top-bar">
       <div class="logo-area" onclick="handleLogoClick()">
         <span class="logo-text">🌙 Gece Market</span>
         <span class="badge-open">Açık</span>
       </div>
-      <button class="btn-header-orders" onclick="openCustomerOrders()">📦 Siparişim</button>
     </div>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Ürün ara (kola, gofret...)" oninput="renderProducts()" />
+      <input type="text" id="searchInput" placeholder="Ürün ara (kola, gofret...)" oninput="filterProducts()" />
     </div>
   </header>
 
-  <nav class="categories-bar" id="categoryContainer">
+  <!-- Kategori Barı -->
+  <nav class="categories-bar">
     <button class="cat-pill active" onclick="setCategory('Tümü', this)">Tümü</button>
     <button class="cat-pill" onclick="setCategory('İçecekler', this)">İçecekler</button>
     <button class="cat-pill" onclick="setCategory('Atıştırmalık', this)">Atıştırmalık</button>
     <button class="cat-pill" onclick="setCategory('Kahvaltılık', this)">Kahvaltılık</button>
     <button class="cat-pill" onclick="setCategory('Kişisel', this)">Kişisel</button>
-    <button class="cat-pill" style="border-color: var(--primary); color: var(--primary);" onclick="openCustomerOrders()">📦 Sipariş Takip</button>
   </nav>
 
-  <main class="container" id="productGrid"></main>
-
-  <aside class="floating-cart-bar" id="cartBar" style="display: none;">
-    <div>
-      <span class="cart-summary-title">Sepet Toplamı</span>
-      <span class="cart-summary-price" id="floatingTotalPrice">0 TL</span>
+  <!-- Ürün Grid (Doğrudan Yüklenir) -->
+  <main class="container" id="productGrid">
+    <div class="card" data-id="1" data-cat="İçecekler" data-name="Coca-Cola">
+      <div><div class="card-img-placeholder">🥤</div><div class="card-title">Coca-Cola</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">45 TL</span><button class="btn-add" onclick="updateQty(1, 1)">Ekle</button></div>
     </div>
-    <button class="btn-open-cart" onclick="toggleCart(true)">
-      <span>Sepetim</span>
-      <span id="floatingTotalCount">(0)</span>
-    </button>
-  </aside>
+    <div class="card" data-id="2" data-cat="İçecekler" data-name="Coca-Cola Zero">
+      <div><div class="card-img-placeholder">🥤</div><div class="card-title">Coca-Cola Zero</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">45 TL</span><button class="btn-add" onclick="updateQty(2, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="3" data-cat="İçecekler" data-name="Fanta">
+      <div><div class="card-img-placeholder">🍊</div><div class="card-title">Fanta</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">45 TL</span><button class="btn-add" onclick="updateQty(3, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="4" data-cat="İçecekler" data-name="Sprite">
+      <div><div class="card-img-placeholder">🍋</div><div class="card-title">Sprite</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">45 TL</span><button class="btn-add" onclick="updateQty(4, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="5" data-cat="İçecekler" data-name="Cola Turka">
+      <div><div class="card-img-placeholder">🥤</div><div class="card-title">Cola Turka</div><div class="card-volume">1.5 L</div></div>
+      <div class="card-footer"><span class="card-price">40 TL</span><button class="btn-add" onclick="updateQty(5, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="6" data-cat="İçecekler" data-name="Uludağ Gazoz">
+      <div><div class="card-img-placeholder">🍾</div><div class="card-title">Uludağ Gazoz</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">35 TL</span><button class="btn-add" onclick="updateQty(6, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="7" data-cat="İçecekler" data-name="Niğde Gazozu">
+      <div><div class="card-img-placeholder">🍾</div><div class="card-title">Niğde Gazozu</div><div class="card-volume">250 ml</div></div>
+      <div class="card-footer"><span class="card-price">20 TL</span><button class="btn-add" onclick="updateQty(7, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="8" data-cat="İçecekler" data-name="Pepsi">
+      <div><div class="card-img-placeholder">🥤</div><div class="card-title">Pepsi</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">45 TL</span><button class="btn-add" onclick="updateQty(8, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="9" data-cat="İçecekler" data-name="7UP">
+      <div><div class="card-img-placeholder">🍋</div><div class="card-title">7UP</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">45 TL</span><button class="btn-add" onclick="updateQty(9, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="10" data-cat="İçecekler" data-name="Schweppes Mandalina">
+      <div><div class="card-img-placeholder">🍊</div><div class="card-title">Schweppes Mandalina</div><div class="card-volume">1 L</div></div>
+      <div class="card-footer"><span class="card-price">55 TL</span><button class="btn-add" onclick="updateQty(10, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="11" data-cat="Atıştırmalık" data-name="Lays Klasik">
+      <div><div class="card-img-placeholder">🥔</div><div class="card-title">Lays Klasik</div><div class="card-volume">Standart</div></div>
+      <div class="card-footer"><span class="card-price">35 TL</span><button class="btn-add" onclick="updateQty(11, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="12" data-cat="Atıştırmalık" data-name="Doritos Nacho">
+      <div><div class="card-img-placeholder">🧀</div><div class="card-title">Doritos Nacho</div><div class="card-volume">Standart</div></div>
+      <div class="card-footer"><span class="card-price">35 TL</span><button class="btn-add" onclick="updateQty(12, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="13" data-cat="Atıştırmalık" data-name="Ruffles Ketçap">
+      <div><div class="card-img-placeholder">🍟</div><div class="card-title">Ruffles Ketçap</div><div class="card-volume">Standart</div></div>
+      <div class="card-footer"><span class="card-price">35 TL</span><button class="btn-add" onclick="updateQty(13, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="14" data-cat="Atıştırmalık" data-name="Çikolatalı Gofret">
+      <div><div class="card-img-placeholder">🍫</div><div class="card-title">Çikolatalı Gofret</div><div class="card-volume">Standart</div></div>
+      <div class="card-footer"><span class="card-price">12 TL</span><button class="btn-add" onclick="updateQty(14, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="15" data-cat="Kahvaltılık" data-name="Üçgen Peynir">
+      <div><div class="card-img-placeholder">🧀</div><div class="card-title">Üçgen Peynir</div><div class="card-volume">8'li</div></div>
+      <div class="card-footer"><span class="card-price">45 TL</span><button class="btn-add" onclick="updateQty(15, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="16" data-cat="Kahvaltılık" data-name="Tost Ekmeği">
+      <div><div class="card-img-placeholder">🍞</div><div class="card-title">Tost Ekmeği</div><div class="card-volume">Büyük Boy</div></div>
+      <div class="card-footer"><span class="card-price">35 TL</span><button class="btn-add" onclick="updateQty(16, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="17" data-cat="Kahvaltılık" data-name="Çokoprens">
+      <div><div class="card-img-placeholder">🍪</div><div class="card-title">Çokoprens</div><div class="card-volume">10'lu</div></div>
+      <div class="card-footer"><span class="card-price">30 TL</span><button class="btn-add" onclick="updateQty(17, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="18" data-cat="Kişisel" data-name="Islak Mendil">
+      <div><div class="card-img-placeholder">🧻</div><div class="card-title">Islak Mendil</div><div class="card-volume">Paket</div></div>
+      <div class="card-footer"><span class="card-price">25 TL</span><button class="btn-add" onclick="updateQty(18, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="19" data-cat="Kişisel" data-name="Cep Mendili">
+      <div><div class="card-img-placeholder">🤧</div><div class="card-title">Cep Mendili</div><div class="card-volume">10'lu</div></div>
+      <div class="card-footer"><span class="card-price">15 TL</span><button class="btn-add" onclick="updateQty(19, 1)">Ekle</button></div>
+    </div>
+    <div class="card" data-id="20" data-cat="Kişisel" data-name="Diş Fırçası & Macun">
+      <div><div class="card-img-placeholder">🪥</div><div class="card-title">Diş Fırçası & Macun</div><div class="card-volume">Set</div></div>
+      <div class="card-footer"><span class="card-price">70 TL</span><button class="btn-add" onclick="updateQty(20, 1)">Ekle</button></div>
+    </div>
+  </main>
 
+  <!-- İstenen Alt Gezinme Barı (Market - Sepetim - Siparişlerim) -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('market')">
+      <div class="nav-icon">🏪</div>
+      <span>Market</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('cart')">
+      <div class="nav-icon">🛒</div>
+      <span>Sepetim</span>
+      <span class="nav-badge" id="navCartBadge">0</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('orders')">
+      <div class="nav-icon">📦</div>
+      <span>Siparişlerim</span>
+    </div>
+  </nav>
+
+  <!-- Sepet Modalı -->
   <div class="modal-overlay" id="cartOverlay">
-    <div class="cart-modal">
-      <div class="cart-header">
-        <h2 class="cart-title">Sepet Detayı</h2>
+    <div class="sheet-modal">
+      <div class="sheet-header">
+        <h2 class="sheet-title">Sepet Detayı</h2>
         <button class="btn-close" onclick="toggleCart(false)">&times;</button>
       </div>
 
@@ -560,15 +631,17 @@
           <div class="summary-line total"><span>Genel Toplam:</span><span id="summaryGrandTotal">0 TL</span></div>
         </div>
 
+        <!-- 3 Kutucuk -->
         <div class="info-input-group">
           <input type="text" id="custName" placeholder="Ad Soyad" />
           <input type="text" id="custAddress" placeholder="Adres (Yurt Adı / Blok - Oda No)" />
           <input 
             type="tel" 
             id="custPhone" 
-            placeholder="Telefon No (05*********)" 
+            placeholder="Telefon Numarası (05*********)" 
             maxlength="11" 
             inputmode="numeric" 
+            pattern="[0-9]*"
             oninput="this.value = this.value.replace(/[^0-9]/g, '')"
           />
         </div>
@@ -579,21 +652,23 @@
         <div class="warning-min" id="minOrderWarning"></div>
       </div>
 
+      <!-- Sipariş Alındı Bildirimi -->
       <div class="success-card" id="successCard">
-        <div class="success-icon">🎉</div>
-        <h3 style="margin-bottom: 8px;">Siparişiniz Alındı!</h3>
-        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">Siparişiniz markete ulaştı, durumu canlı takip edebilirsiniz.</p>
+        <div style="font-size: 3rem; margin-bottom: 8px;">🎉</div>
+        <h3 style="margin-bottom: 6px;">Siparişiniz Alındı!</h3>
+        <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 12px;">Siparişiniz markete ulaştı, hemen hazırlanacaktır.</p>
         <div style="background: #f0f0f4; padding: 10px; border-radius: 8px; font-weight: 700; margin-bottom: 14px;" id="orderCodeText">Sipariş No: #</div>
-        <button class="btn-checkout" style="background: var(--primary);" onclick="showLiveTrackingFromSuccess()">Siparişimin Durumunu Gör</button>
+        <button class="btn-checkout" style="background: var(--primary);" onclick="goToOrdersFromSuccess()">Siparişlerime Git</button>
       </div>
     </div>
   </div>
 
+  <!-- Çift Onay Popup -->
   <div id="confirmOverlay">
     <div class="confirm-card">
       <div style="font-size: 2.2rem; margin-bottom: 8px;">❓</div>
       <h3>Siparişi onaylıyor musunuz?</h3>
-      <p>Siparişiniz kuryeye iletilecektir.</p>
+      <p style="font-size:0.85rem; color:var(--muted); margin-top:4px;">Siparişiniz hazırlanıp odanıza getirilecektir.</p>
       <div class="confirm-btn-group">
         <button class="btn-confirm-no" onclick="closeConfirmModal()">Siparişe Devam Et</button>
         <button class="btn-confirm-yes" onclick="executeOrderSupabase()">Onaylıyorum</button>
@@ -601,11 +676,12 @@
     </div>
   </div>
 
-  <div id="ordersModal">
-    <div class="orders-sheet">
-      <div class="cart-header">
-        <h2 class="cart-title">📦 Siparişim Nerede?</h2>
-        <button class="btn-close" onclick="closeCustomerOrders()">&times;</button>
+  <!-- Siparişlerim Modalı -->
+  <div class="modal-overlay" id="ordersOverlay">
+    <div class="sheet-modal">
+      <div class="sheet-header">
+        <h2 class="sheet-title">📦 Siparişim Nerede?</h2>
+        <button class="btn-close" onclick="toggleOrders(false)">&times;</button>
       </div>
       <div id="customerOrderStatusArea" style="text-align: center; padding: 16px 8px;">
         Yükleniyor...
@@ -613,6 +689,7 @@
     </div>
   </div>
 
+  <!-- Canlı Yönetici Paneli -->
   <div id="adminModal">
     <div class="admin-header">
       <h2>🛵 Canlı Sipariş Paneli</h2>
@@ -626,32 +703,6 @@
   </div>
 
   <script>
-    const products = [
-      { id: 1, name: "Coca-Cola", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
-      { id: 2, name: "Coca-Cola Zero", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
-      { id: 3, name: "Fanta", volume: "1 L", price: 45, category: "İçecekler", icon: "🍊" },
-      { id: 4, name: "Sprite", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
-      { id: 5, name: "Cola Turka", volume: "1.5 L", price: 40, category: "İçecekler", icon: "🥤" },
-      { id: 6, name: "Uludağ Gazoz", volume: "1 L", price: 35, category: "İçecekler", icon: "🍾" },
-      { id: 7, name: "Niğde Gazozu", volume: "250 ml", price: 20, category: "İçecekler", icon: "🍾" },
-      { id: 8, name: "Pepsi", volume: "1 L", price: 45, category: "İçecekler", icon: "🥤" },
-      { id: 9, name: "7UP", volume: "1 L", price: 45, category: "İçecekler", icon: "🍋" },
-      { id: 10, name: "Schweppes", volume: "1 L", price: 55, category: "İçecekler", icon: "🍊" },
-      { id: 11, name: "Lays Klasik", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🥔" },
-      { id: 12, name: "Doritos Nacho", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🧀" },
-      { id: 13, name: "Ruffles Ketçap", volume: "Standart", price: 35, category: "Atıştırmalık", icon: "🍟" },
-      { id: 14, name: "Çikolatalı Gofret", volume: "Standart", price: 12, category: "Atıştırmalık", icon: "🍫" },
-      { id: 15, name: "Üçgen Peynir", volume: "8'li", price: 45, category: "Kahvaltılık", icon: "🧀" },
-      { id: 16, name: "Tost Ekmeği", volume: "Büyük Boy", price: 35, category: "Kahvaltılık", icon: "🍞" },
-      { id: 17, name: "Çokoprens", volume: "10'lu", price: 30, category: "Kahvaltılık", icon: "🍪" },
-      { id: 18, name: "Islak Mendil", volume: "Paket", price: 25, category: "Kişisel", icon: "🧻" },
-      { id: 19, name: "Cep Mendili", volume: "10'lu", price: 15, category: "Kişisel", icon: "🤧" },
-      { id: 20, name: "Diş Fırçası Seti", volume: "Set", price: 70, category: "Kişisel", icon: "🪥" }
-    ];
-
-    let cart = {};
-    let selectedCategory = "Tümü";
-
     const SUPABASE_BASE = "https://mohzhmkucaucrhraoafv.supabase.co/rest/v1";
     const SUPABASE_KEY = "sb_publishable_4Vm5rJr-aLRQnEnN1xsIBw_8uxbYyvp";
     const ADMIN_PASSWORD = "5298030";
@@ -660,21 +711,426 @@
     const FREE_SHIPPING_LIMIT = 300;
     const SHIPPING_FEE = 50;
 
-    function renderProducts() {
-      const grid = document.getElementById("productGrid");
-      if (!grid) return;
-      const searchEl = document.getElementById("searchInput");
-      const query = searchEl ? searchEl.value.toLowerCase() : "";
-      
-      const filtered = products.filter(p => {
-        const matchesCat = selectedCategory === "Tümü" || p.category === selectedCategory;
-        const matchesSearch = p.name.toLowerCase().includes(query);
-        return matchesCat && matchesSearch;
-      });
+    const productData = {
+      1: { name: "Coca-Cola", price: 45 },
+      2: { name: "Coca-Cola Zero", price: 45 },
+      3: { name: "Fanta", price: 45 },
+      4: { name: "Sprite", price: 45 },
+      5: { name: "Cola Turka", price: 40 },
+      6: { name: "Uludağ Gazoz", price: 35 },
+      7: { name: "Niğde Gazozu", price: 20 },
+      8: { name: "Pepsi", price: 45 },
+      9: { name: "7UP", price: 45 },
+      10: { name: "Schweppes Mandalina", price: 55 },
+      11: { name: "Lays Klasik", price: 35 },
+      12: { name: "Doritos Nacho", price: 35 },
+      13: { name: "Ruffles Ketçap", price: 35 },
+      14: { name: "Çikolatalı Gofret", price: 12 },
+      15: { name: "Üçgen Peynir", price: 45 },
+      16: { name: "Tost Ekmeği", price: 35 },
+      17: { name: "Çokoprens", price: 30 },
+      18: { name: "Islak Mendil", price: 25 },
+      19: { name: "Cep Mendili", price: 15 },
+      20: { name: "Diş Fırçası & Macun", price: 70 }
+    };
 
-      grid.innerHTML = filtered.map(p => {
-        const qty = cart[p.id] || 0;
-        return `
-          <div class="card">
+    let cart = {};
+    let selectedCategory = "Tümü";
+
+    function updateQty(id, delta) {
+      const current = cart[id] || 0;
+      const next = current + delta;
+      if (next <= 0) delete cart[id];
+      else cart[id] = next;
+
+      // Kartın footer butonlarını güncelle
+      const card = document.querySelector(`.card[data-id="${id}"] .card-footer`);
+      if (card) {
+        const p = productData[id];
+        const qty = cart[id] || 0;
+        card.innerHTML = `
+          <span class="card-price">${p.price} TL</span>
+          ${
+            qty === 0
+              ? `<button class="btn-add" onclick="updateQty(${id}, 1)">Ekle</button>`
+              : `<div class="qty-controls">
+                   <button class="qty-btn" onclick="updateQty(${id}, -1)">-</button>
+                   <span class="qty-number">${qty}</span>
+                   <button class="qty-btn" onclick="updateQty(${id}, 1)">+</button>
+                 </div>`
+          }
+        `;
+      }
+      updateCartUI();
+    }
+
+    function setCategory(cat, el) {
+      selectedCategory = cat;
+      document.querySelectorAll(".cat-pill").forEach(btn => btn.classList.remove("active"));
+      el.classList.add("active");
+      filterProducts();
+    }
+
+    function filterProducts() {
+      const query = (document.getElementById("searchInput").value || "").toLowerCase();
+      document.querySelectorAll(".card").forEach(c => {
+        const cat = c.getAttribute("data-cat");
+        const name = c.getAttribute("data-name").toLowerCase();
+        const matchesCat = selectedCategory === "Tümü" || cat === selectedCategory;
+        const matchesQuery = name.includes(query);
+        c.style.display = matchesCat && matchesQuery ? "flex" : "none";
+      });
+    }
+
+    function updateCartUI() {
+      let subtotal = 0;
+      let totalCount = 0;
+      const container = document.getElementById("cartItemsContainer");
+      container.innerHTML = "";
+
+      for (let id in cart) {
+        const p = productData[id];
+        const qty = cart[id];
+        if (p && qty > 0) {
+          subtotal += p.price * qty;
+          totalCount += qty;
+
+          const itemRow = document.createElement("div");
+          itemRow.className = "cart-item";
+          itemRow.innerHTML = `
             <div>
- 
+              <div class="cart-item-name">${p.name}</div>
+              <div class="cart-item-unit-price">${p.price} TL x ${qty} = <b>${p.price * qty} TL</b></div>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty(${id}, -1)">-</button>
+              <span class="qty-number">${qty}</span>
+              <button class="qty-btn" onclick="updateQty(${id}, 1)">+</button>
+            </div>
+          `;
+          container.appendChild(itemRow);
+        }
+      }
+
+      // Alt sekme badge'i
+      const badge = document.getElementById("navCartBadge");
+      if (totalCount > 0) {
+        badge.style.display = "block";
+        badge.innerText = totalCount;
+      } else {
+        badge.style.display = "none";
+      }
+
+      let shipping = 0;
+      const promoText = document.getElementById("promoText");
+      const promoBar = document.getElementById("promoProgressBar");
+
+      if (subtotal >= FREE_SHIPPING_LIMIT || subtotal === 0) {
+        shipping = 0;
+        promoText.innerText = "🎉 Harika! Ücretsiz teslimat kazandınız.";
+        promoBar.style.width = "100%";
+      } else {
+        shipping = SHIPPING_FEE;
+        const remaining = FREE_SHIPPING_LIMIT - subtotal;
+        promoText.innerText = `${remaining} TL daha ekle, teslimat ÜCRETSİZ olsun!`;
+        promoBar.style.width = `${Math.min(100, (subtotal / FREE_SHIPPING_LIMIT) * 100)}%`;
+      }
+
+      const grandTotal = subtotal + (subtotal > 0 ? shipping : 0);
+
+      document.getElementById("summarySubtotal").innerText = `${subtotal} TL`;
+      document.getElementById("summaryShipping").innerText = shipping === 0 ? "Ücretsiz" : `${shipping} TL`;
+      document.getElementById("summaryGrandTotal").innerText = `${grandTotal} TL`;
+
+      const checkoutBtn = document.getElementById("btnCheckout");
+      const warningText = document.getElementById("minOrderWarning");
+
+      if (subtotal < MIN_ORDER_AMOUNT) {
+        checkoutBtn.disabled = true;
+        warningText.innerText = `Minimum sipariş tutarı ${MIN_ORDER_AMOUNT} TL'dir.`;
+      } else {
+        checkoutBtn.disabled = false;
+        warningText.innerText = "";
+      }
+    }
+
+    // Alt Tab Yönetimi
+    function switchTab(tab) {
+      document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+      if (tab === "market") {
+        document.querySelectorAll(".nav-item")[0].classList.add("active");
+        toggleCart(false);
+        toggleOrders(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (tab === "cart") {
+        document.querySelectorAll(".nav-item")[1].classList.add("active");
+        toggleOrders(false);
+        toggleCart(true);
+      } else if (tab === "orders") {
+        document.querySelectorAll(".nav-item")[2].classList.add("active");
+        toggleCart(false);
+        toggleOrders(true);
+        loadCustomerOrders();
+      }
+    }
+
+    function toggleCart(show) {
+      document.getElementById("cartOverlay").classList.toggle("active", show);
+      if (!show && !document.getElementById("ordersOverlay").classList.contains("active")) {
+        document.querySelectorAll(".nav-item")[0].classList.add("active");
+        document.querySelectorAll(".nav-item")[1].classList.remove("active");
+      }
+    }
+
+    function toggleOrders(show) {
+      document.getElementById("ordersOverlay").classList.toggle("active", show);
+      if (!show && !document.getElementById("cartOverlay").classList.contains("active")) {
+        document.querySelectorAll(".nav-item")[0].classList.add("active");
+        document.querySelectorAll(".nav-item")[2].classList.remove("active");
+      }
+    }
+
+    // Bilgi Kontrolü ve Onay Ekranı
+    function askOrderConfirmation() {
+      const name = document.getElementById("custName").value.trim();
+      const addr = document.getElementById("custAddress").value.trim();
+      const phone = document.getElementById("custPhone").value.trim();
+
+      if (!name) { alert("Lütfen Ad Soyad giriniz."); return; }
+      if (!addr) { alert("Lütfen açık Adres / Oda bilgisi giriniz."); return; }
+      if (phone.length !== 11 || !phone.startsWith("05")) {
+        alert("Lütfen telefon numaranızı 05********* şeklinde 11 haneli giriniz.");
+        return;
+      }
+      document.getElementById("confirmOverlay").classList.add("active");
+    }
+
+    function closeConfirmModal() {
+      document.getElementById("confirmOverlay").classList.remove("active");
+    }
+
+    async function executeOrderSupabase() {
+      closeConfirmModal();
+      const name = document.getElementById("custName").value.trim();
+      const addr = document.getElementById("custAddress").value.trim();
+      const phone = document.getElementById("custPhone").value.trim();
+      const btn = document.getElementById("btnCheckout");
+
+      let subtotal = 0;
+      let orderLines = [];
+
+      for (let id in cart) {
+        const p = productData[id];
+        const qty = cart[id];
+        if (p && qty > 0) {
+          subtotal += p.price * qty;
+          orderLines.push(`${p.name} (${qty}x)`);
+        }
+      }
+
+      const shipping = subtotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_FEE;
+      const grandTotal = subtotal + shipping;
+
+      btn.disabled = true;
+      btn.innerText = "Sipariş Alınıyor...";
+
+      try {
+        const response = await fetch(`${SUPABASE_BASE}/orders`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify({
+            customer_name: name,
+            room_info: `${addr} | Tel: ${phone}`,
+            items: orderLines.join(", "),
+            subtotal: subtotal,
+            shipping_fee: shipping,
+            total_amount: grandTotal,
+            status: "Hazırlanıyor"
+          })
+        });
+
+        if (!response.ok) throw new Error("Veritabanına ulaşılamadı.");
+
+        const data = await response.json();
+        const orderId = (data && data[0]) ? data[0].id : Math.floor(100 + Math.random() * 900);
+
+        localStorage.setItem("lastOrderId", orderId);
+
+        document.getElementById("cartContentArea").style.display = "none";
+        document.getElementById("orderCodeText").innerText = `Sipariş No: #${orderId}`;
+        document.getElementById("successCard").classList.add("active");
+
+        // Sepeti sıfırla
+        cart = {};
+        document.querySelectorAll(".card").forEach(c => {
+          const id = c.getAttribute("data-id");
+          const p = productData[id];
+          c.querySelector(".card-footer").innerHTML = `
+            <span class="card-price">${p.price} TL</span>
+            <button class="btn-add" onclick="updateQty(${id}, 1)">Ekle</button>
+          `;
+        });
+        updateCartUI();
+
+      } catch (err) {
+        alert("Hata oluştu: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Siparişi Onayla (Kapıda Nakit)";
+      }
+    }
+
+    function goToOrdersFromSuccess() {
+      document.getElementById("successCard").classList.remove("active");
+      document.getElementById("cartContentArea").style.display = "block";
+      toggleCart(false);
+      switchTab('orders');
+    }
+
+    // Sipariş Durumu Sorgulama
+    async function loadCustomerOrders() {
+      const area = document.getElementById("customerOrderStatusArea");
+      const lastId = localStorage.getItem("lastOrderId");
+      if (!lastId) {
+        area.innerHTML = `
+          <div style="font-size:2.5rem; margin-bottom:8px;">🛒</div>
+          <p style="color:var(--muted); font-size:0.9rem;">Henüz kayıtlı bir siparişiniz bulunmuyor.</p>
+        `;
+        return;
+      }
+
+      area.innerHTML = "Sipariş durumu sorgulanıyor...";
+
+      try {
+        const res = await fetch(`${SUPABASE_BASE}/orders?id=eq.${lastId}`, {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        const data = await res.json();
+        if (!data || data.length === 0) {
+          area.innerHTML = "Sipariş bulunamadı.";
+          return;
+        }
+
+        const o = data[0];
+        let statusBadgeClass = "status-hazirlaniyor";
+        let statusEmoji = "⏳";
+        let statusDesc = "Siparişiniz markette hazırlanıyor.";
+
+        if (o.status === "Yola Çıktı") {
+          statusBadgeClass = "status-yolda";
+          statusEmoji = "🛵";
+          statusDesc = "Kurye siparişinizle yola çıktı, kapınıza geliyor!";
+        } else if (o.status === "Teslim Edildi") {
+          statusBadgeClass = "status-teslim";
+          statusEmoji = "✅";
+          statusDesc = "Siparişiniz teslim edildi. Afiyet olsun!";
+        }
+
+        area.innerHTML = `
+          <div style="font-size:3rem; margin-bottom:8px;">${statusEmoji}</div>
+          <h3 style="margin-bottom:6px;">Sipariş #${o.id}</h3>
+          <div class="status-badge ${statusBadgeClass}">Durum: ${o.status}</div>
+          <p style="margin:14px 0 10px; font-size:0.85rem; color:var(--muted);">${statusDesc}</p>
+          <div style="background:#f4f4f7; padding:10px; border-radius:8px; font-size:0.85rem; text-align:left; margin-top:12px;">
+            <div><b>Teslimat:</b> ${o.room_info}</div>
+            <div style="margin-top:4px;"><b>Ürünler:</b> ${o.items}</div>
+            <div style="margin-top:4px;"><b>Toplam:</b> ${o.total_amount} TL (Kapıda Nakit)</div>
+          </div>
+          <button onclick="loadCustomerOrders()" style="margin-top:14px; background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700;">Durumu Yenile 🔄</button>
+        `;
+      } catch (e) {
+        area.innerHTML = "Hata: " + e.message;
+      }
+    }
+
+    // Yönetici Paneli Fonksiyonları (Şifre: 5298030)
+    let logoClicks = 0;
+    let clickTimer = null;
+
+    function handleLogoClick() {
+      logoClicks++;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => { logoClicks = 0; }, 1200);
+
+      if (logoClicks >= 3) {
+        logoClicks = 0;
+        const pass = prompt("Yönetici Şifresi:");
+        if (pass === ADMIN_PASSWORD) {
+          openAdmin();
+        } else if (pass !== null) {
+          alert("Hatalı şifre!");
+        }
+      }
+    }
+
+    function openAdmin() {
+      document.getElementById("adminModal").classList.add("active");
+      loadAdminOrders();
+    }
+
+    function closeAdmin() {
+      document.getElementById("adminModal").classList.remove("active");
+    }
+
+    async function loadAdminOrders() {
+      const container = document.getElementById("adminOrdersContainer");
+      container.innerHTML = "Siparişler yükleniyor...";
+
+      try {
+        const res = await fetch(`${SUPABASE_BASE}/orders?select=*&order=id.desc&limit=25`, {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        
+        const data = await res.json();
+        if (!data || data.length === 0) {
+          container.innerHTML = "Henüz sipariş yok.";
+          return;
+        }
+
+        container.innerHTML = data.map(o => `
+          <div class="order-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <b>#${o.id} - ${o.customer_name}</b>
+              <span style="font-size:0.8rem; background:#333; padding:2px 6px; border-radius:4px;">${o.status}</span>
+            </div>
+            <div style="font-size:0.85rem; color:#aaa; margin-bottom:4px;">📍 ${o.room_info}</div>
+            <div style="font-size:0.9rem; margin:8px 0;">📦 ${o.items}</div>
+            <div style="font-weight:700; color:var(--secondary); margin-bottom:8px;">Toplam: ${o.total_amount} TL</div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Hazırlanıyor')" style="flex:1; padding:6px; font-size:0.75rem; background:#ff9500; color:#fff; border:none; border-radius:4px;">Hazırlanıyor</button>
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Yola Çıktı')" style="flex:1; padding:6px; font-size:0.75rem; background:#432b89; color:#fff; border:none; border-radius:4px;">Yola Çıktı</button>
+              <button onclick="updateOrderStatusDirect(${o.id}, 'Teslim Edildi')" style="flex:1; padding:6px; font-size:0.75rem; background:#34c759; color:#fff; border:none; border-radius:4px;">Teslim Edildi</button>
+            </div>
+          </div>
+        `).join("");
+      } catch (err) {
+        container.innerHTML = "Yükleme hatası: " + err.message;
+      }
+    }
+
+    async function updateOrderStatusDirect(orderId, newStatus) {
+      await fetch(`${SUPABASE_BASE}/orders?id=eq.${orderId}`, {
+        method: "PATCH",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      loadAdminOrders();
+    }
+  </script>
+</body>
+</html>
